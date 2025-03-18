@@ -1,0 +1,37 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+package-lock.json
+
+# Variables de entorno
+.env
+
+# Logs
+logs
+*.log
+logs/*
+debug.log
+error.log
+
+# Directorios de bases de datos locales
+*.sqlite
+*.db
+.DS_Store
+
+# Archivos de compilación de TypeScript (si usas TypeScript)
+dist/
+tsconfig.tsbuildinfo
+
+# Configuración de editores de código
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Archivos generados por el sistema operativo
+Thumbs.db
+.DS_Store
