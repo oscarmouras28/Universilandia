@@ -1,6 +1,6 @@
 import sql from '../config/db.js'
 
-export async function createUser (name, email, password) {
+async function createUser (name, email, password) {
   try {
     const pool = await sql.connect()
     await pool.request()
@@ -12,3 +12,5 @@ export async function createUser (name, email, password) {
     console.error('Error al crear usuario:', error)
   }
 }
+
+export default createUser
