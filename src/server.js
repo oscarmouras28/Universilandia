@@ -13,7 +13,13 @@ app.use(express.json())
 // Rutas
 app.use('/api/users', userRoutes)
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`))
+const PORT = process.env.PORT || 3000
 
-connectDB() // Conectar a la base de datos
+app.get('/', (req, res) => {
+  res.send('¡Universilandia Backend funcionando!')
+})
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`)
+  connectDB() // Conectar a la base de datos
+})
