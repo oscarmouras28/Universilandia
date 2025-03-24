@@ -16,9 +16,12 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mssql": "^11.0.1"
+    "mssql": "^11.0.1",
+    "mysql2": "^3.14.0",
+    "sequelize": "^6.37.6"
   },
   "devDependencies": {
+    "@types/sequelize": "^4.28.20",
     "standard": "17.1.2"
   },
   "eslintConfig": {
