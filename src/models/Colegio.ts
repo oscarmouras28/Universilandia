@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión
-import TipoColegio from './TipoColegio'; // Importa el modelo relacionado
-import Comuna from './Comuna'; // Importa el modelo relacionado
+import TipoColegio from '../models/TipoColegio.ts'; // Importa el modelo relacionado se debe hacer para que funcione.
+import Comuna from '../models/Comuna.ts'; // Importa el modelo relacionado se debe hacer para que funcione la relación.
 
 // Interfaz para definir los atributos del modelo Colegio
 interface ColegioAttributes {
@@ -15,7 +15,7 @@ interface ColegioAttributes {
 interface ColegioCreationAttributes extends Optional<ColegioAttributes, 'idColegio'> {}
 
 // Clase del modelo Colegio
-class Colegio extends Model<ColegioAttributes, ColegioCreationAttributes> implements ColegioAttributes {
+export class Colegio extends Model<ColegioAttributes, ColegioCreationAttributes> implements ColegioAttributes {
   public idColegio!: string;
   public nombre!: string;
   public idTipoColegio!: string;
@@ -45,26 +45,26 @@ class Colegio extends Model<ColegioAttributes, ColegioCreationAttributes> implem
 Colegio.init(
   {
     idColegio: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(16),
       primaryKey: true,
       allowNull: false,
-      defaultValue: DataTypes.UUIDV4 // Genera un UUID automáticamente
     },
     nombre: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     idTipoColegio: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(16),
       allowNull: false, // Clave foránea, no puede ser nula
     },
     comuna_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(16),
       allowNull: false, // Clave foránea, no puede ser nula
     },
   },
   {
     sequelize, // Conexión configurada
+    modelName: 'Colegio', // Nombre del modelo
     tableName: 'colegio', // Nombre de la tabla en la base de datos
     timestamps: true, // Habilita createdAt y updatedAt
   }
