@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { usuario } from '../models/usuario'; // Asegúrate de usar la ruta correcta
+import { usuario } from '../models/usuario.js'; // Asegúrate de usar la ruta correcta
 
 // Listar todos los usuarios
 export const getusuarios = async (req: Request, res: Response) => {

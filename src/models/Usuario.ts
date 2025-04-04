@@ -33,7 +33,7 @@ export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes>
   setComentarios!: Sequelize.HasManySetAssociationsMixin<comentario, comentarioId>;
   addComentario!: Sequelize.HasManyAddAssociationMixin<comentario, comentarioId>;
   addComentarios!: Sequelize.HasManyAddAssociationsMixin<comentario, comentarioId>;
-  createComentario!: Sequelize.HasManyCreateAssociationMixin<comentario>;
+  createComentario!: Sequelize.HasManyCreateAssociationMixin<comentario, "idComentario">;
   removeComentario!: Sequelize.HasManyRemoveAssociationMixin<comentario, comentarioId>;
   removeComentarios!: Sequelize.HasManyRemoveAssociationsMixin<comentario, comentarioId>;
   hasComentario!: Sequelize.HasManyHasAssociationMixin<comentario, comentarioId>;
