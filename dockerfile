@@ -15,4 +15,4 @@ RUN npm install --omit=dev
 EXPOSE 5000
 
 # 6️⃣ Definir el comando de inicio del backend
-CMD ["node", "src/server.js"]
+CMD ["node", "dist/server.js"]
