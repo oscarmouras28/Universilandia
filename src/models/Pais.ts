@@ -1,44 +1,60 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión a la base de datos
+import type { region, regionId } from './region';
 
-
-interface PaisAttributes {
+export interface paisAttributes {
   idPais: string;
   nombrePais: string;
 }
 
-//No tiene atributos opcionales
-interface PaisCreationAttributes extends Optional<PaisAttributes, 'idPais'> {}
+export type paisPk = "idPais";
+export type paisId = pais[paisPk];
+export type paisOptionalAttributes = "idPais";
+export type paisCreationAttributes = Optional<paisAttributes, paisOptionalAttributes>;
 
-//Clase del modelo Pais
-export class Pais extends Model<PaisAttributes, PaisCreationAttributes> implements PaisAttributes {
-  public idPais!: string;
-  public nombrePais!: string;
+export class pais extends Model<paisAttributes, paisCreationAttributes> implements paisAttributes {
+  idPais!: string;
+  nombrePais!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-}
+  // pais hasMany region via idPais
+  regions!: region[];
+  getRegions!: Sequelize.HasManyGetAssociationsMixin<region>;
+  setRegions!: Sequelize.HasManySetAssociationsMixin<region, regionId>;
+  addRegion!: Sequelize.HasManyAddAssociationMixin<region, regionId>;
+  addRegions!: Sequelize.HasManyAddAssociationsMixin<region, regionId>;
+  createRegion!: Sequelize.HasManyCreateAssociationMixin<region>;
+  removeRegion!: Sequelize.HasManyRemoveAssociationMixin<region, regionId>;
+  removeRegions!: Sequelize.HasManyRemoveAssociationsMixin<region, regionId>;
+  hasRegion!: Sequelize.HasManyHasAssociationMixin<region, regionId>;
+  hasRegions!: Sequelize.HasManyHasAssociationsMixin<region, regionId>;
+  countRegions!: Sequelize.HasManyCountAssociationsMixin;
 
-//No tiene asociaciones con otras tablas
-
-//Inicializar el modelo
-Pais.init({
-  idPais: {
-    type: DataTypes.STRING(16),
-    allowNull: false,
-    primaryKey: true
-  },
-  nombrePais: {
-    type: DataTypes.STRING(50),
-    allowNull: false
+  static initModel(sequelize: Sequelize.Sequelize): typeof pais {
+    return pais.init({
+    idPais: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
+    },
+    nombrePais: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'pais',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "pais_PK",
+        unique: true,
+        fields: [
+          { name: "idPais" },
+        ]
+      },
+    ]
+  });
   }
-}, {
-  sequelize,
-  modelName: 'Pais', // Nombre del modelo
-  tableName: 'pais',
-  timestamps: true,
-});
-
-//exportar el modelo Pais
-export default Pais;
+}

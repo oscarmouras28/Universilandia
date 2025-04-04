@@ -1,62 +1,63 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import Universidad from './universidad.ts';
+import type { universidad, universidadId } from './universidad';
 
-interface EscuelaUniversidadAttributes {
-    idEscUniversidad: string;
-    escuela: string;
-    idUniversidad: string;
+export interface escuelaUniversidadAttributes {
+  idEscUniversidad: string;
+  escuela: string;
+  idUniversidad: string;
 }
 
+export type escuelaUniversidadPk = "idEscUniversidad";
+export type escuelaUniversidadId = escuelaUniversidad[escuelaUniversidadPk];
+export type escuelaUniversidadOptionalAttributes = "idEscUniversidad";
+export type escuelaUniversidadCreationAttributes = Optional<escuelaUniversidadAttributes, escuelaUniversidadOptionalAttributes>;
 
-interface EscuelaUniversidadCreationAttributes extends Optional<EscuelaUniversidadAttributes, 'idEscUniversidad'> { }
+export class escuelaUniversidad extends Model<escuelaUniversidadAttributes, escuelaUniversidadCreationAttributes> implements escuelaUniversidadAttributes {
+  idEscUniversidad!: string;
+  escuela!: string;
+  idUniversidad!: string;
 
-export class EscuelaUniversidad extends Model<EscuelaUniversidadAttributes, EscuelaUniversidadCreationAttributes> implements EscuelaUniversidadAttributes {
-    public idEscUniversidad!: string;
-    public escuela!: string;
-    public idUniversidad!: string;
+  // escuelaUniversidad belongsTo universidad via idUniversidad
+  idUniversidad_universidad!: universidad;
+  getIdUniversidad_universidad!: Sequelize.BelongsToGetAssociationMixin<universidad>;
+  setIdUniversidad_universidad!: Sequelize.BelongsToSetAssociationMixin<universidad, universidadId>;
+  createIdUniversidad_universidad!: Sequelize.BelongsToCreateAssociationMixin<universidad>;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-
-    //Metodos estaticos para definir asociaciones
-    // Métodos estáticos para definir asociaciones
-    static associate() {
-        // Relación con TipoColegio
-        EscuelaUniversidad.belongsTo(Universidad, {
-            foreignKey: 'idUniversidad',
-            as: 'universidad', // Alias para la relación
-        });
-    }
-}
-//Inicializar el modelo
-EscuelaUniversidad.init(
-    {
-        idEscUniversidad: {
-            type: DataTypes.STRING(16),
-            primaryKey: true,
-            allowNull: false,
-        },
-        escuela: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
-        },
-        idUniversidad: {
-            type: DataTypes.STRING(16),
-            allowNull: false,
-        },
+  static initModel(sequelize: Sequelize.Sequelize): typeof escuelaUniversidad {
+    return escuelaUniversidad.init({
+    idEscUniversidad: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
-    {
-        sequelize,
-        modelName: 'EscuelaUniversidad',
-        tableName: 'escuelaUniversidad',
-        timestamps: true,
+    escuela: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    idUniversidad: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'universidad',
+        key: 'idUniversidad'
+      }
     }
-);
-
-
-// Exportar el modelo
-export default EscuelaUniversidad;
-
-    
+  }, {
+    sequelize,
+    tableName: 'escuelaUniversidad',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "escuela_PK",
+        unique: true,
+        fields: [
+          { name: "idEscUniversidad" },
+        ]
+      },
+    ]
+  });
+  }
+}

@@ -1,73 +1,81 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import universidad from './universidad.js';
+import type { universidad, universidadId } from './universidad';
 
-interface CarreraUniAttributes {
-    idCarrUni: string;
-    nombreCarrera: string;
-    modalidad: number;
-    arancel: number;
-    semestres: number;
-    idUniversidad: string;
+export interface carreraUniAttributes {
+  idCarrUni: string;
+  nombreCarrera: string;
+  modalidad?: number;
+  arancel?: number;
+  semestres?: number;
+  idUniversidad: string;
 }
 
-interface CarreraUniCreationAttributes extends Optional<CarreraUniAttributes, 'idCarrUni'|'modalidad'|'arancel'|'semestres'> {}
+export type carreraUniPk = "idCarrUni";
+export type carreraUniId = carreraUni[carreraUniPk];
+export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres";
+export type carreraUniCreationAttributes = Optional<carreraUniAttributes, carreraUniOptionalAttributes>;
 
-export class carreraUni extends Model<CarreraUniAttributes, CarreraUniCreationAttributes> implements CarreraUniAttributes {
-    public idCarrUni!: string;
-    public nombreCarrera!: string;
-    public modalidad!: number;
-    public arancel!: number;
-    public semestres!: number;
-    public idUniversidad!: string;
+export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAttributes> implements carreraUniAttributes {
+  idCarrUni!: string;
+  nombreCarrera!: string;
+  modalidad?: number;
+  arancel?: number;
+  semestres?: number;
+  idUniversidad!: string;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+  // carreraUni belongsTo universidad via idUniversidad
+  idUniversidad_universidad!: universidad;
+  getIdUniversidad_universidad!: Sequelize.BelongsToGetAssociationMixin<universidad>;
+  setIdUniversidad_universidad!: Sequelize.BelongsToSetAssociationMixin<universidad, universidadId>;
+  createIdUniversidad_universidad!: Sequelize.BelongsToCreateAssociationMixin<universidad>;
 
-    static asociate () {
-        carreraUni.belongsTo(universidad, {
-            foreignKey: 'idUniversidad',
-            //targetKey: 'idUniversidad',
-            as: 'universidad'
-        });
-    }
-}
-
-carreraUni.init(
-    {
-        idCarrUni: {
-            type: DataTypes.STRING(16),
-            primaryKey: true,
-            allowNull: false
-        },
-        nombreCarrera: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        },
-        modalidad: {
-            type: DataTypes.INTEGER,
-            allowNull: true //esta permitiendo null, como en la base de datos
-        },
-        arancel: {
-            type: DataTypes.INTEGER, //esta permitiendo null, como en la base de datos
-            allowNull: true
-        },
-        semestres: {
-            type: DataTypes.INTEGER, //esta permitiendo null, como en la base de datos
-            allowNull: true
-        },
-        idUniversidad: {
-            type: DataTypes.STRING(16),
-            allowNull: false
-        }
+  static initModel(sequelize: Sequelize.Sequelize): typeof carreraUni {
+    return carreraUni.init({
+    idCarrUni: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
-    {
-        sequelize,
-        modelName: 'carreraUni',
-        tableName: 'carreraUni',
-        timestamps: true,
+    nombreCarrera: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    modalidad: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    arancel: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    semestres: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    idUniversidad: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'universidad',
+        key: 'idUniversidad'
+      }
     }
-);
-
-export default carreraUni;
+  }, {
+    sequelize,
+    tableName: 'carreraUni',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "carrera_PK",
+        unique: true,
+        fields: [
+          { name: "idCarrUni" },
+        ]
+      },
+    ]
+  });
+  }
+}

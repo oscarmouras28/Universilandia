@@ -1,42 +1,60 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión
+import type { colegio, colegioId } from './colegio';
 
-interface TipoColegioAttributes {
-    idTipoColegio: string;
-    nombre: string;
+export interface tipoColegioAttributes {
+  idTipoColegio: string;
+  tipo: string;
 }
 
-//No tiene atributos opcionales
-interface TipoColegioCreationAttributes extends Optional<TipoColegioAttributes, 'idTipoColegio'> { }
+export type tipoColegioPk = "idTipoColegio";
+export type tipoColegioId = tipoColegio[tipoColegioPk];
+export type tipoColegioOptionalAttributes = "idTipoColegio";
+export type tipoColegioCreationAttributes = Optional<tipoColegioAttributes, tipoColegioOptionalAttributes>;
 
-//Clase de modelo TipoColegio
-export class TipoColegio extends Model<TipoColegioAttributes, TipoColegioCreationAttributes> implements TipoColegioAttributes {
-    idTipoColegio: string;
-    nombre: string;
+export class tipoColegio extends Model<tipoColegioAttributes, tipoColegioCreationAttributes> implements tipoColegioAttributes {
+  idTipoColegio!: string;
+  tipo!: string;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-}
+  // tipoColegio hasMany colegio via idTipoColegio
+  colegios!: colegio[];
+  getColegios!: Sequelize.HasManyGetAssociationsMixin<colegio>;
+  setColegios!: Sequelize.HasManySetAssociationsMixin<colegio, colegioId>;
+  addColegio!: Sequelize.HasManyAddAssociationMixin<colegio, colegioId>;
+  addColegios!: Sequelize.HasManyAddAssociationsMixin<colegio, colegioId>;
+  createColegio!: Sequelize.HasManyCreateAssociationMixin<colegio>;
+  removeColegio!: Sequelize.HasManyRemoveAssociationMixin<colegio, colegioId>;
+  removeColegios!: Sequelize.HasManyRemoveAssociationsMixin<colegio, colegioId>;
+  hasColegio!: Sequelize.HasManyHasAssociationMixin<colegio, colegioId>;
+  hasColegios!: Sequelize.HasManyHasAssociationsMixin<colegio, colegioId>;
+  countColegios!: Sequelize.HasManyCountAssociationsMixin;
 
-//Inicializar el modelo
-TipoColegio.init(
-    {
-        idTipoColegio: {
-            type: DataTypes.STRING(16),
-            allowNull: false,
-            primaryKey: true
-        },
-        nombre: {
-            type: DataTypes.STRING(50),
-            allowNull: false
-        }
-    }, {
+  static initModel(sequelize: Sequelize.Sequelize): typeof tipoColegio {
+    return tipoColegio.init({
+    idTipoColegio: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
+    },
+    tipo: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    }
+  }, {
     sequelize,
-    modelName: 'TipoColegio', //Nombre del modelo
-    tableName: 'tipoColegio', //Nombre de la tabla en la base de datos
-    timestamps: true,
-});
-
-//Exportar el modelo
-export default TipoColegio;
+    tableName: 'tipoColegio',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "tipo_colegio_PK",
+        unique: true,
+        fields: [
+          { name: "idTipoColegio" },
+        ]
+      },
+    ]
+  });
+  }
+}

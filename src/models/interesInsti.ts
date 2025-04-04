@@ -1,60 +1,73 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import Estudiante from '../models/Estudiante.ts';
-import Instituto from './instituto.ts'; 
+import type { estudiante, estudianteId } from './estudiante';
+import type { instituto, institutoId } from './instituto';
 
-interface InteresInstiAttributes {
+export interface interesInstiAttributes {
   idInterIns: string;
   idEstudiante: string;
   idInstituto: string;
 }
 
-interface InteresInstiCreationAttributes extends Optional<InteresInstiAttributes, 'idInterIns'> {}
+export type interesInstiPk = "idInterIns";
+export type interesInstiId = interesInsti[interesInstiPk];
+export type interesInstiOptionalAttributes = "idInterIns";
+export type interesInstiCreationAttributes = Optional<interesInstiAttributes, interesInstiOptionalAttributes>;
 
-export class InteresInsti extends Model<InteresInstiAttributes, InteresInstiCreationAttributes> implements InteresInstiAttributes {
-  public idInterIns!: string;
-  public idEstudiante!: string;
-  public idInstituto!: string;
+export class interesInsti extends Model<interesInstiAttributes, interesInstiCreationAttributes> implements interesInstiAttributes {
+  idInterIns!: string;
+  idEstudiante!: string;
+  idInstituto!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // interesInsti belongsTo estudiante via idEstudiante
+  idEstudiante_estudiante!: estudiante;
+  getIdEstudiante_estudiante!: Sequelize.BelongsToGetAssociationMixin<estudiante>;
+  setIdEstudiante_estudiante!: Sequelize.BelongsToSetAssociationMixin<estudiante, estudianteId>;
+  createIdEstudiante_estudiante!: Sequelize.BelongsToCreateAssociationMixin<estudiante>;
+  // interesInsti belongsTo instituto via idInstituto
+  idInstituto_instituto!: instituto;
+  getIdInstituto_instituto!: Sequelize.BelongsToGetAssociationMixin<instituto>;
+  setIdInstituto_instituto!: Sequelize.BelongsToSetAssociationMixin<instituto, institutoId>;
+  createIdInstituto_instituto!: Sequelize.BelongsToCreateAssociationMixin<instituto>;
 
-
-//Relaciones con otros modelos
-  static asociate() {
-    InteresInsti.belongsTo(Estudiante, {
-      foreignKey: 'idEstudiante',
-      as: 'estudiante',
-      //  targetKey: 'idEstudiante', para especificar que la relación se basa en la columna idEstudiante del modelo Estudiante.
-    });
-    InteresInsti.belongsTo(Instituto, {
-      foreignKey: 'idInstituto',
-      as: 'instituto',
-    });
-  }
-}
-
-InteresInsti.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof interesInsti {
+    return interesInsti.init({
     idInterIns: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     idEstudiante: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'estudiante',
+        key: 'idEstudiante'
+      }
     },
     idInstituto: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
-    },
-  },
-  {
+      references: {
+        model: 'instituto',
+        key: 'idInstituto'
+      }
+    }
+  }, {
     sequelize,
-    modelName: 'InteresInsti',
-    tableName: 'interesinsti',
-    timestamps: true,
+    tableName: 'interesInsti',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "Interes_Insti_PK",
+        unique: true,
+        fields: [
+          { name: "idInterIns" },
+        ]
+      },
+    ]
+  });
   }
-);
-export default InteresInsti;
+}

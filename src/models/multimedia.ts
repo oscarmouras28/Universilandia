@@ -1,42 +1,47 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
 
-interface MultimediaAttributes {
+export interface multimediaAttributes {
   idMultimedia: string;
   url: string;
 }
 
+export type multimediaPk = "idMultimedia";
+export type multimediaId = multimedia[multimediaPk];
+export type multimediaOptionalAttributes = "idMultimedia";
+export type multimediaCreationAttributes = Optional<multimediaAttributes, multimediaOptionalAttributes>;
 
-interface MultimediaCreationAttributes extends Optional<MultimediaAttributes, 'idMultimedia'> { }
+export class multimedia extends Model<multimediaAttributes, multimediaCreationAttributes> implements multimediaAttributes {
+  idMultimedia!: string;
+  url!: string;
 
-export class Multimedia extends Model<MultimediaAttributes, MultimediaCreationAttributes> implements MultimediaAttributes {
-  public idMultimedia!: string;
-  public url!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-}
-
-//Inicializar el modelo 
-Multimedia.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof multimedia {
+    return multimedia.init({
     idMultimedia: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     url: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-  },
-  {
+      allowNull: false
+    }
+  }, {
     sequelize,
-    modelName: 'Multimedia',
     tableName: 'multimedia',
-    timestamps: true, // disable timestamps
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "multimedia_PK",
+        unique: true,
+        fields: [
+          { name: "idMultimedia" },
+        ]
+      },
+    ]
+  });
   }
-);
-// Exportar el modelo
-export default Multimedia;
+}

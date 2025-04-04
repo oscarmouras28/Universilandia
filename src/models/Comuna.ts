@@ -1,61 +1,102 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión a la base de datos
-import Region from '../models/Region.ts'; // Asegúrate de que este archivo defina correctamente el modelo Region
+import type { colegio, colegioId } from './colegio';
+import type { instituto, institutoId } from './instituto';
+import type { region, regionId } from './region';
+import type { universidad, universidadId } from './universidad';
 
-interface ComunaAttributes {
+export interface comunaAttributes {
   idComuna: string;
   nombreComuna: string;
   idRegion: string;
 }
 
-//No tiene atributos opcionales, se agrega idComuna porque es la clave primaria. Esta clave se genera automáticamente en la base de datos.
-interface ComunaCreationAttributes extends Optional<ComunaAttributes, 'idComuna'> {}
+export type comunaPk = "idComuna";
+export type comunaId = comuna[comunaPk];
+export type comunaOptionalAttributes = "idComuna";
+export type comunaCreationAttributes = Optional<comunaAttributes, comunaOptionalAttributes>;
 
-//Clase del modelo Comuna 
-export class Comuna extends Model<ComunaAttributes, ComunaCreationAttributes> implements ComunaAttributes {
-  public idComuna!: string;
-  public nombreComuna!: string;
-  public idRegion!: string;
+export class comuna extends Model<comunaAttributes, comunaCreationAttributes> implements comunaAttributes {
+  idComuna!: string;
+  nombreComuna!: string;
+  idRegion!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // comuna hasMany colegio via idComuna
+  colegios!: colegio[];
+  getColegios!: Sequelize.HasManyGetAssociationsMixin<colegio>;
+  setColegios!: Sequelize.HasManySetAssociationsMixin<colegio, colegioId>;
+  addColegio!: Sequelize.HasManyAddAssociationMixin<colegio, colegioId>;
+  addColegios!: Sequelize.HasManyAddAssociationsMixin<colegio, colegioId>;
+  createColegio!: Sequelize.HasManyCreateAssociationMixin<colegio>;
+  removeColegio!: Sequelize.HasManyRemoveAssociationMixin<colegio, colegioId>;
+  removeColegios!: Sequelize.HasManyRemoveAssociationsMixin<colegio, colegioId>;
+  hasColegio!: Sequelize.HasManyHasAssociationMixin<colegio, colegioId>;
+  hasColegios!: Sequelize.HasManyHasAssociationsMixin<colegio, colegioId>;
+  countColegios!: Sequelize.HasManyCountAssociationsMixin;
+  // comuna hasMany instituto via idComuna
+  institutos!: instituto[];
+  getInstitutos!: Sequelize.HasManyGetAssociationsMixin<instituto>;
+  setInstitutos!: Sequelize.HasManySetAssociationsMixin<instituto, institutoId>;
+  addInstituto!: Sequelize.HasManyAddAssociationMixin<instituto, institutoId>;
+  addInstitutos!: Sequelize.HasManyAddAssociationsMixin<instituto, institutoId>;
+  createInstituto!: Sequelize.HasManyCreateAssociationMixin<instituto>;
+  removeInstituto!: Sequelize.HasManyRemoveAssociationMixin<instituto, institutoId>;
+  removeInstitutos!: Sequelize.HasManyRemoveAssociationsMixin<instituto, institutoId>;
+  hasInstituto!: Sequelize.HasManyHasAssociationMixin<instituto, institutoId>;
+  hasInstitutos!: Sequelize.HasManyHasAssociationsMixin<instituto, institutoId>;
+  countInstitutos!: Sequelize.HasManyCountAssociationsMixin;
+  // comuna hasMany universidad via idComuna
+  universidads!: universidad[];
+  getUniversidads!: Sequelize.HasManyGetAssociationsMixin<universidad>;
+  setUniversidads!: Sequelize.HasManySetAssociationsMixin<universidad, universidadId>;
+  addUniversidad!: Sequelize.HasManyAddAssociationMixin<universidad, universidadId>;
+  addUniversidads!: Sequelize.HasManyAddAssociationsMixin<universidad, universidadId>;
+  createUniversidad!: Sequelize.HasManyCreateAssociationMixin<universidad>;
+  removeUniversidad!: Sequelize.HasManyRemoveAssociationMixin<universidad, universidadId>;
+  removeUniversidads!: Sequelize.HasManyRemoveAssociationsMixin<universidad, universidadId>;
+  hasUniversidad!: Sequelize.HasManyHasAssociationMixin<universidad, universidadId>;
+  hasUniversidads!: Sequelize.HasManyHasAssociationsMixin<universidad, universidadId>;
+  countUniversidads!: Sequelize.HasManyCountAssociationsMixin;
+  // comuna belongsTo region via idRegion
+  idRegion_region!: region;
+  getIdRegion_region!: Sequelize.BelongsToGetAssociationMixin<region>;
+  setIdRegion_region!: Sequelize.BelongsToSetAssociationMixin<region, regionId>;
+  createIdRegion_region!: Sequelize.BelongsToCreateAssociationMixin<region>;
 
-
-  //metodo estáticos para definir asociaciones 
-static associate() {
-    // Relación con TipoColegio
-    Comuna.belongsTo(Region, {
-      foreignKey: 'idRegion',
-      as: 'region', // Alias para la relación
-    });
-  }
-}
-
-//Inicializar el modelo
-Comuna.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof comuna {
+    return comuna.init({
     idComuna: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     nombreComuna: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: false
     },
     idRegion: {
-      type: DataTypes.STRING(16),
-      allowNull: false, // Clave foránea, no puede ser nula porque debe estar relacionada con una región
-    },
-  },
-  {
-    sequelize, // Conexión configurada
-    modelName: 'Comuna', // Nombre del modelo
-    tableName: 'comuna', // Nombre de la tabla en la base de datos
-    timestamps: true, // Habilita createdAt y updatedAt
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'region',
+        key: 'idRegion'
+      }
+    }
+  }, {
+    sequelize,
+    tableName: 'comuna',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "comuna_PK",
+        unique: true,
+        fields: [
+          { name: "idComuna" },
+        ]
+      },
+    ]
+  });
   }
-);
-//Exportar el modelo Comuna
-export default Comuna;
-
+}

@@ -1,74 +1,133 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión
+import type { comentario, comentarioId } from './comentario';
+import type { estudiante, estudianteId } from './estudiante';
+import type { likeBlog, likeBlogId } from './likeBlog';
+import type { suscripcion, suscripcionId } from './suscripcion';
 
-// Interfaz para definir los atributos del modelo Usuario
-export interface UsuarioAttributes {
+export interface usuarioAttributes {
   idUsuario: string;
   correo: string;
-  password: Buffer; // Cambiado a Buffer para almacenar el hash de la contraseña
+  password: any;
   fechaCreacion: Date;
   tipoUsuario: string;
   activo: boolean;
 }
 
-// Interfaz para definir los atributos opcionales al crear un usuario ( Esto se puede utilizar asi en caso de que existan atributos que no sean requeridos al crear un usuario).
-//interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'idUsuario' | 'fechaCreacion' | 'activo'> {}
+export type usuarioPk = "idUsuario";
+export type usuarioId = usuario[usuarioPk];
+export type usuarioOptionalAttributes = "idUsuario" | "fechaCreacion" | "activo";
+export type usuarioCreationAttributes = Optional<usuarioAttributes, usuarioOptionalAttributes>;
 
-// Interfaz para definir los atributos al crear un usuario (no son atributos opcionales).
-interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'idUsuario'> { }
+export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes> implements usuarioAttributes {
+  idUsuario!: string;
+  correo!: string;
+  password!: any;
+  fechaCreacion!: Date;
+  tipoUsuario!: string;
+  activo!: boolean;
 
-// Clase del modelo Usuario
-export class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implements UsuarioAttributes {
-  public idUsuario!: string;
-  public correo!: string;
-  public password!: Buffer; // Cambiado a Buffer para almacenar el hash de la contraseña
-  public fechaCreacion!: Date;
-  public tipoUsuario!: string;
-  public activo!: boolean;
+  // usuario hasMany comentario via idUsuario
+  comentarios!: comentario[];
+  getComentarios!: Sequelize.HasManyGetAssociationsMixin<comentario>;
+  setComentarios!: Sequelize.HasManySetAssociationsMixin<comentario, comentarioId>;
+  addComentario!: Sequelize.HasManyAddAssociationMixin<comentario, comentarioId>;
+  addComentarios!: Sequelize.HasManyAddAssociationsMixin<comentario, comentarioId>;
+  createComentario!: Sequelize.HasManyCreateAssociationMixin<comentario>;
+  removeComentario!: Sequelize.HasManyRemoveAssociationMixin<comentario, comentarioId>;
+  removeComentarios!: Sequelize.HasManyRemoveAssociationsMixin<comentario, comentarioId>;
+  hasComentario!: Sequelize.HasManyHasAssociationMixin<comentario, comentarioId>;
+  hasComentarios!: Sequelize.HasManyHasAssociationsMixin<comentario, comentarioId>;
+  countComentarios!: Sequelize.HasManyCountAssociationsMixin;
+  // usuario hasMany estudiante via idUsuario
+  estudiantes!: estudiante[];
+  getEstudiantes!: Sequelize.HasManyGetAssociationsMixin<estudiante>;
+  setEstudiantes!: Sequelize.HasManySetAssociationsMixin<estudiante, estudianteId>;
+  addEstudiante!: Sequelize.HasManyAddAssociationMixin<estudiante, estudianteId>;
+  addEstudiantes!: Sequelize.HasManyAddAssociationsMixin<estudiante, estudianteId>;
+  createEstudiante!: Sequelize.HasManyCreateAssociationMixin<estudiante>;
+  removeEstudiante!: Sequelize.HasManyRemoveAssociationMixin<estudiante, estudianteId>;
+  removeEstudiantes!: Sequelize.HasManyRemoveAssociationsMixin<estudiante, estudianteId>;
+  hasEstudiante!: Sequelize.HasManyHasAssociationMixin<estudiante, estudianteId>;
+  hasEstudiantes!: Sequelize.HasManyHasAssociationsMixin<estudiante, estudianteId>;
+  countEstudiantes!: Sequelize.HasManyCountAssociationsMixin;
+  // usuario hasMany likeBlog via idUsuario
+  likeBlogs!: likeBlog[];
+  getLikeBlogs!: Sequelize.HasManyGetAssociationsMixin<likeBlog>;
+  setLikeBlogs!: Sequelize.HasManySetAssociationsMixin<likeBlog, likeBlogId>;
+  addLikeBlog!: Sequelize.HasManyAddAssociationMixin<likeBlog, likeBlogId>;
+  addLikeBlogs!: Sequelize.HasManyAddAssociationsMixin<likeBlog, likeBlogId>;
+  createLikeBlog!: Sequelize.HasManyCreateAssociationMixin<likeBlog>;
+  removeLikeBlog!: Sequelize.HasManyRemoveAssociationMixin<likeBlog, likeBlogId>;
+  removeLikeBlogs!: Sequelize.HasManyRemoveAssociationsMixin<likeBlog, likeBlogId>;
+  hasLikeBlog!: Sequelize.HasManyHasAssociationMixin<likeBlog, likeBlogId>;
+  hasLikeBlogs!: Sequelize.HasManyHasAssociationsMixin<likeBlog, likeBlogId>;
+  countLikeBlogs!: Sequelize.HasManyCountAssociationsMixin;
+  // usuario hasMany suscripcion via idUsuario
+  suscripcions!: suscripcion[];
+  getSuscripcions!: Sequelize.HasManyGetAssociationsMixin<suscripcion>;
+  setSuscripcions!: Sequelize.HasManySetAssociationsMixin<suscripcion, suscripcionId>;
+  addSuscripcion!: Sequelize.HasManyAddAssociationMixin<suscripcion, suscripcionId>;
+  addSuscripcions!: Sequelize.HasManyAddAssociationsMixin<suscripcion, suscripcionId>;
+  createSuscripcion!: Sequelize.HasManyCreateAssociationMixin<suscripcion>;
+  removeSuscripcion!: Sequelize.HasManyRemoveAssociationMixin<suscripcion, suscripcionId>;
+  removeSuscripcions!: Sequelize.HasManyRemoveAssociationsMixin<suscripcion, suscripcionId>;
+  hasSuscripcion!: Sequelize.HasManyHasAssociationMixin<suscripcion, suscripcionId>;
+  hasSuscripcions!: Sequelize.HasManyHasAssociationsMixin<suscripcion, suscripcionId>;
+  countSuscripcions!: Sequelize.HasManyCountAssociationsMixin;
 
-  // Timestamps opcionales (si usas createdAt y updatedAt)
-  public readonly updatedAt!: Date;
-}
-
-// Inicializar el modelo
-Usuario.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof usuario {
+    return usuario.init({
     idUsuario: {
-      type: DataTypes.STRING(16), // Cambiado a STRING(16) para limitar la longitud del UUID
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
-      // Genera un UUID v4 por defecto, comsultar si es necesario en este caso. Pero eso ya lo hace la base de datos. 
-      //primaryKey: True está reemplazando a unique: true. Ya que es redundante tener ambas propiedades en la misma columna.
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     correo: {
       type: DataTypes.STRING(150),
       allowNull: false,
-      unique: true, // Esto permite que el correo sea único en la base de datos.
+      unique: "UQ__usuario__2A586E0BBEB6FE17"
     },
     password: {
-      type: DataTypes.BLOB,//RAW se mapea a BLOB en mysql, pero se puede cambiar a STRING si se desea.
-      allowNull: false,
+      type: DataTypes.BLOB,
+      allowNull: false
     },
     fechaCreacion: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('sysdatetime')
     },
     tipoUsuario: {
       type: DataTypes.STRING(30),
-      allowNull: false,
+      allowNull: false
     },
     activo: {
-      type: DataTypes.CHAR(1), // Cambiado a CHAR(1) para almacenar un valor booleano (0 o 1)
-      defaultValue: true,
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-    },
-  },
-  {
-    sequelize, // Conexión configurada en el archivo db.js
-    modelName: 'Usuario', // Nombre del modelo
-    tableName: 'usuario', // Nombre de la tabla en la base de datos mysql
-    timestamps: true, // Cambia a true si usas createdAt y updatedAt
+      defaultValue: true
+    }
+  }, {
+    sequelize,
+    tableName: 'usuario',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "UQ__usuario__2A586E0BBEB6FE17",
+        unique: true,
+        fields: [
+          { name: "correo" },
+        ]
+      },
+      {
+        name: "user_PK",
+        unique: true,
+        fields: [
+          { name: "idUsuario" },
+        ]
+      },
+    ]
+  });
   }
-);
-export default Usuario;
+}

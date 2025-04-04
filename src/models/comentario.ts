@@ -1,10 +1,9 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import { Usuario } from './usuario.ts';
-import { Blog } from './blog.ts';
+import type { blog, blogId } from './blog';
+import type { usuario, usuarioId } from './usuario';
 
-// Definición del modelo Comentario
-interface ComentarioAttributes {
+export interface comentarioAttributes {
   idComentario: string;
   contenido: string;
   fechaCreacion: Date;
@@ -12,61 +11,76 @@ interface ComentarioAttributes {
   idBlog: string;
 }
 
+export type comentarioPk = "idComentario";
+export type comentarioId = comentario[comentarioPk];
+export type comentarioOptionalAttributes = "idComentario" | "fechaCreacion";
+export type comentarioCreationAttributes = Optional<comentarioAttributes, comentarioOptionalAttributes>;
 
-interface ComentarioCreationAttributes extends Optional<ComentarioAttributes, 'idComentario'> {}
+export class comentario extends Model<comentarioAttributes, comentarioCreationAttributes> implements comentarioAttributes {
+  idComentario!: string;
+  contenido!: string;
+  fechaCreacion!: Date;
+  idUsuario!: string;
+  idBlog!: string;
 
-export class Comentario extends Model<ComentarioAttributes, ComentarioCreationAttributes> implements ComentarioAttributes {
-  public idComentario!: string;
-  public contenido!: string;
-  public fechaCreacion!: Date;
-  public idUsuario!: string;
-  public idBlog!: string;
+  // comentario belongsTo blog via idBlog
+  idBlog_blog!: blog;
+  getIdBlog_blog!: Sequelize.BelongsToGetAssociationMixin<blog>;
+  setIdBlog_blog!: Sequelize.BelongsToSetAssociationMixin<blog, blogId>;
+  createIdBlog_blog!: Sequelize.BelongsToCreateAssociationMixin<blog>;
+  // comentario belongsTo usuario via idUsuario
+  idUsuario_usuario!: usuario;
+  getIdUsuario_usuario!: Sequelize.BelongsToGetAssociationMixin<usuario>;
+  setIdUsuario_usuario!: Sequelize.BelongsToSetAssociationMixin<usuario, usuarioId>;
+  createIdUsuario_usuario!: Sequelize.BelongsToCreateAssociationMixin<usuario>;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-  //relaciones 
-  static associate() { 
-    Comentario.belongsTo(Usuario, {
-      foreignKey: 'idUsuario',
-      as: 'usuario',
-    });
-    Comentario.belongsTo(Blog, {
-      foreignKey: 'idBlog',
-      as: 'blog',
-    });
-  }
-}
-
-Comentario.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof comentario {
+    return comentario.init({
     idComentario: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     contenido: {
       type: DataTypes.STRING(1000),
-      allowNull: false,
+      allowNull: false
     },
     fechaCreacion: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('sysdatetime')
     },
     idUsuario: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'usuario',
+        key: 'idUsuario'
+      }
     },
     idBlog: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
-    },
-  },
-  {
-    sequelize, 
-    modelName: 'Comentario',
+      references: {
+        model: 'blog',
+        key: 'idBlog'
+      }
+    }
+  }, {
+    sequelize,
     tableName: 'comentario',
-    timestamps: true,
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "comentario_PK",
+        unique: true,
+        fields: [
+          { name: "idComentario" },
+        ]
+      },
+    ]
+  });
   }
-);
-export default Comentario;
+}

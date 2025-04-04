@@ -1,55 +1,63 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import { Instituto } from './instituto.ts';
+import type { instituto, institutoId } from './instituto';
 
-interface EscuelaInstitutoAttributes {
+export interface escuelaInstitutoAttributes {
   idEscuelaInstituto: string;
-  escuela: string;
+  escuela?: string;
   idInstituto: string;
 }
 
-interface EscuelaInstitutoCreationAttributes extends Optional<EscuelaInstitutoAttributes, 'idEscuelaInstituto'|'escuela'> {}
+export type escuelaInstitutoPk = "idEscuelaInstituto";
+export type escuelaInstitutoId = escuelaInstituto[escuelaInstitutoPk];
+export type escuelaInstitutoOptionalAttributes = "idEscuelaInstituto" | "escuela";
+export type escuelaInstitutoCreationAttributes = Optional<escuelaInstitutoAttributes, escuelaInstitutoOptionalAttributes>;
 
+export class escuelaInstituto extends Model<escuelaInstitutoAttributes, escuelaInstitutoCreationAttributes> implements escuelaInstitutoAttributes {
+  idEscuelaInstituto!: string;
+  escuela?: string;
+  idInstituto!: string;
 
-export class EscuelaInstituto extends Model<EscuelaInstitutoAttributes, EscuelaInstitutoCreationAttributes> implements EscuelaInstitutoAttributes {
-  public idEscuelaInstituto!: string;
-  public escuela!: string;
-  public idInstituto!: string;
+  // escuelaInstituto belongsTo instituto via idInstituto
+  idInstituto_instituto!: instituto;
+  getIdInstituto_instituto!: Sequelize.BelongsToGetAssociationMixin<instituto>;
+  setIdInstituto_instituto!: Sequelize.BelongsToSetAssociationMixin<instituto, institutoId>;
+  createIdInstituto_instituto!: Sequelize.BelongsToCreateAssociationMixin<instituto>;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
-  static associate() {
-    EscuelaInstituto.belongsTo(Instituto, {
-      foreignKey: 'idInstituto',
-      as: 'instituto'
-    });
-  }
-}
-
-EscuelaInstituto.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof escuelaInstituto {
+    return escuelaInstituto.init({
     idEscuelaInstituto: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
-      unique: true
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     escuela: {
       type: DataTypes.STRING(50),
-      allowNull: false
+      allowNull: true
     },
     idInstituto: {
-      type: DataTypes.STRING(16),
-      allowNull: false
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'instituto',
+        key: 'idInstituto'
+      }
     }
-  },
-  {
+  }, {
     sequelize,
-    modelName: 'EscuelaInstituto',
     tableName: 'escuelaInstituto',
-    timestamps: true,
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "EscuelaInstituto_PK",
+        unique: true,
+        fields: [
+          { name: "idEscuelaInstituto" },
+        ]
+      },
+    ]
+  });
   }
-);
-export default EscuelaInstituto;
+}

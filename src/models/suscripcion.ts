@@ -1,69 +1,77 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js';
-import { Usuario } from './usuario.js';
+import type { usuario, usuarioId } from './usuario';
 
-interface SuscripcionAttributes {
-    idSuscripcion: string;
-    fechaInicio: Date;
-    fechaTermino: Date;
-    estado: string;
-    idUsuario: string;
+export interface suscripcionAttributes {
+  idSuscripcion: string;
+  fechaInicio: Date;
+  fechaTermino: Date;
+  estado: boolean;
+  idUsuario: string;
 }
 
-interface SuscripcionCreationAttributes extends Optional<SuscripcionAttributes, 'idSuscripcion'> { }
+export type suscripcionPk = "idSuscripcion";
+export type suscripcionId = suscripcion[suscripcionPk];
+export type suscripcionOptionalAttributes = "idSuscripcion" | "fechaInicio" | "estado";
+export type suscripcionCreationAttributes = Optional<suscripcionAttributes, suscripcionOptionalAttributes>;
 
+export class suscripcion extends Model<suscripcionAttributes, suscripcionCreationAttributes> implements suscripcionAttributes {
+  idSuscripcion!: string;
+  fechaInicio!: Date;
+  fechaTermino!: Date;
+  estado!: boolean;
+  idUsuario!: string;
 
-export class Suscripcion extends Model<SuscripcionAttributes, SuscripcionCreationAttributes> implements SuscripcionAttributes {
-    public idSuscripcion!: string;
-    public fechaInicio!: Date;
-    public fechaTermino!: Date;
-    public estado!: string;
-    public idUsuario!: string;
+  // suscripcion belongsTo usuario via idUsuario
+  idUsuario_usuario!: usuario;
+  getIdUsuario_usuario!: Sequelize.BelongsToGetAssociationMixin<usuario>;
+  setIdUsuario_usuario!: Sequelize.BelongsToSetAssociationMixin<usuario, usuarioId>;
+  createIdUsuario_usuario!: Sequelize.BelongsToCreateAssociationMixin<usuario>;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-
-    //Metodos estaticos para definir asociaciones
-    static associate() {
-        Suscripcion.belongsTo(Usuario, {
-            foreignKey: 'idUsuario',
-            as: 'usuario'
-        });
-    }
-}
-
-//Inicializar el modelo Suscripcion
-Suscripcion.init(
-    {
-        idSuscripcion: {
-            type: DataTypes.STRING(16),
-            primaryKey: true,
-            allowNull: false,
-        },
-        fechaInicio: {
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        fechaTermino: {
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        estado: {
-            type: DataTypes.CHAR(1),
-            allowNull: false,
-        },
-        idUsuario: {
-            type: DataTypes.STRING(16),
-            allowNull: false,
-        },
+  static initModel(sequelize: Sequelize.Sequelize): typeof suscripcion {
+    return suscripcion.init({
+    idSuscripcion: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
-    {
-        sequelize, // passing the `sequelize` instance is required
-        modelName: 'Suscripcion', // We need to choose the model name
-        tableName: 'suscripcion', // We need to choose the model name
-        timestamps: true,
+    fechaInicio: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('sysdatetime')
+    },
+    fechaTermino: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    estado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    },
+    idUsuario: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'usuario',
+        key: 'idUsuario'
+      }
     }
-);
-//Exportar el modelo
-export default Suscripcion;
+  }, {
+    sequelize,
+    tableName: 'suscripcion',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "suscripcion_PK",
+        unique: true,
+        fields: [
+          { name: "idSuscripcion" },
+        ]
+      },
+    ]
+  });
+  }
+}

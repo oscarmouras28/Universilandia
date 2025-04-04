@@ -1,39 +1,60 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión con tu base de datos
+import type { estudiante, estudianteId } from './estudiante';
 
-interface NivelEducacionalAttributes {
+export interface nivelEducacionalAttributes {
   idNivel: string;
   nivel: string;
 }
 
+export type nivelEducacionalPk = "idNivel";
+export type nivelEducacionalId = nivelEducacional[nivelEducacionalPk];
+export type nivelEducacionalOptionalAttributes = "idNivel";
+export type nivelEducacionalCreationAttributes = Optional<nivelEducacionalAttributes, nivelEducacionalOptionalAttributes>;
 
-interface NivelEducacionalCreationAttributes extends Optional<NivelEducacionalAttributes, 'idNivel'> {}
+export class nivelEducacional extends Model<nivelEducacionalAttributes, nivelEducacionalCreationAttributes> implements nivelEducacionalAttributes {
+  idNivel!: string;
+  nivel!: string;
 
-export class NivelEducacional extends Model<NivelEducacionalAttributes, NivelEducacionalCreationAttributes> implements NivelEducacionalAttributes {
-  public idNivel!: string;
-  public nivel!: string;
+  // nivelEducacional hasMany estudiante via idNivelEducacional
+  estudiantes!: estudiante[];
+  getEstudiantes!: Sequelize.HasManyGetAssociationsMixin<estudiante>;
+  setEstudiantes!: Sequelize.HasManySetAssociationsMixin<estudiante, estudianteId>;
+  addEstudiante!: Sequelize.HasManyAddAssociationMixin<estudiante, estudianteId>;
+  addEstudiantes!: Sequelize.HasManyAddAssociationsMixin<estudiante, estudianteId>;
+  createEstudiante!: Sequelize.HasManyCreateAssociationMixin<estudiante>;
+  removeEstudiante!: Sequelize.HasManyRemoveAssociationMixin<estudiante, estudianteId>;
+  removeEstudiantes!: Sequelize.HasManyRemoveAssociationsMixin<estudiante, estudianteId>;
+  hasEstudiante!: Sequelize.HasManyHasAssociationMixin<estudiante, estudianteId>;
+  hasEstudiantes!: Sequelize.HasManyHasAssociationsMixin<estudiante, estudianteId>;
+  countEstudiantes!: Sequelize.HasManyCountAssociationsMixin;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-}
-
-//Inicializar el modelo
-NivelEducacional.init({
-  idNivel: {
-    type: DataTypes.STRING(16),
-    allowNull: false,
-    primaryKey: true
-  },
-  nivel: {
-    type: DataTypes.STRING(50),
-    allowNull: false
+  static initModel(sequelize: Sequelize.Sequelize): typeof nivelEducacional {
+    return nivelEducacional.init({
+    idNivel: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
+    },
+    nivel: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    tableName: 'nivelEducacional',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "nivel_estudio_PK",
+        unique: true,
+        fields: [
+          { name: "idNivel" },
+        ]
+      },
+    ]
+  });
   }
-}, {
-  sequelize,
-  tableName: 'nivelEducacional', // Nombre de la tabla en la base de datos
-  modelName: 'NivelEducacional', //Quizas se deba cambiar mas adelante para que sea igual al nombre de la tabla
-  timestamps: true,
-});
-
-//Exportar el modelo
-export default NivelEducacional;
+}

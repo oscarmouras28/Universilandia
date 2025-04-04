@@ -1,64 +1,73 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión con tu base de datos
-import Estudiante from '../models/Estudiante.ts'; // Asegúrate de que este archivo esté en la ubicación correcta
-import Universidad from '../models/universidad.ts'; // Asegúrate de que este archivo esté en la ubicación correcta
-interface InteresUniAttributes {
-    idIntUni: string;
-    idEstudiante: string;
-    idUniversidad: String;
+import type { estudiante, estudianteId } from './estudiante';
+import type { universidad, universidadId } from './universidad';
+
+export interface interesUniAttributes {
+  idIntUni: string;
+  idEstudiante: string;
+  idUniversidad: string;
 }
 
-//No tiene atributos opcionales
-interface InteresUniCreationAttributes extends Optional<InteresUniAttributes, 'idIntUni'> { }
+export type interesUniPk = "idIntUni";
+export type interesUniId = interesUni[interesUniPk];
+export type interesUniOptionalAttributes = "idIntUni";
+export type interesUniCreationAttributes = Optional<interesUniAttributes, interesUniOptionalAttributes>;
 
-//Clase del modelo
-export class InteresUni extends Model<InteresUniAttributes, InteresUniCreationAttributes> implements InteresUniAttributes {
-    public idIntUni!: string;
-    public idEstudiante!: string;
-    public idUniversidad!: String;
+export class interesUni extends Model<interesUniAttributes, interesUniCreationAttributes> implements interesUniAttributes {
+  idIntUni!: string;
+  idEstudiante!: string;
+  idUniversidad!: string;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+  // interesUni belongsTo estudiante via idEstudiante
+  idEstudiante_estudiante!: estudiante;
+  getIdEstudiante_estudiante!: Sequelize.BelongsToGetAssociationMixin<estudiante>;
+  setIdEstudiante_estudiante!: Sequelize.BelongsToSetAssociationMixin<estudiante, estudianteId>;
+  createIdEstudiante_estudiante!: Sequelize.BelongsToCreateAssociationMixin<estudiante>;
+  // interesUni belongsTo universidad via idUniversidad
+  idUniversidad_universidad!: universidad;
+  getIdUniversidad_universidad!: Sequelize.BelongsToGetAssociationMixin<universidad>;
+  setIdUniversidad_universidad!: Sequelize.BelongsToSetAssociationMixin<universidad, universidadId>;
+  createIdUniversidad_universidad!: Sequelize.BelongsToCreateAssociationMixin<universidad>;
 
-
-    
-    // Métodos estáticos para definir asociaciones
-    static associate() {
-        InteresUni.belongsTo(Estudiante, {
-            foreignKey: 'idEstudiante',
-            as: 'estudiante',
-        });
-
-        InteresUni.belongsTo(Universidad, {
-            foreignKey: 'idUniversidad',
-            as: 'universidad',
-        });
-    }
-}
-
-//Inicializar el modelo 
-InteresUni.init({
+  static initModel(sequelize: Sequelize.Sequelize): typeof interesUni {
+    return interesUni.init({
     idIntUni: {
-        type: DataTypes.STRING(16),
-        primaryKey: true,
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     idEstudiante: {
-        type: DataTypes.STRING(16),
-        allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'estudiante',
+        key: 'idEstudiante'
+      }
     },
     idUniversidad: {
-        type: DataTypes.STRING(16),
-        allowNull: false,
-    },
-}, {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'universidad',
+        key: 'idUniversidad'
+      }
+    }
+  }, {
     sequelize,
-    tableName: 'interesUni', // Nombre de la tabla en la base de datos
-    modelName: 'InteresUni',
-    timestamps: true, // Cambia a true si usas createdAt y updatedAt
-});
-//Se exporta el modelo 
-export default InteresUni;
-
-
-
+    tableName: 'interesUni',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "interes_PK",
+        unique: true,
+        fields: [
+          { name: "idIntUni" },
+        ]
+      },
+    ]
+  });
+  }
+}

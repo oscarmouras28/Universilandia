@@ -1,76 +1,92 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión
-import TipoColegio from '../models/TipoColegio.ts'; // Importa el modelo relacionado se debe hacer para que funcione.
-import Comuna from '../models/Comuna.ts'; // Importa el modelo relacionado se debe hacer para que funcione la relación.
+import type { comuna, comunaId } from './comuna';
+import type { estudiante, estudianteId } from './estudiante';
+import type { tipoColegio, tipoColegioId } from './tipoColegio';
 
-// Interfaz para definir los atributos del modelo Colegio
-interface ColegioAttributes {
+export interface colegioAttributes {
   idColegio: string;
   nombre: string;
-  idTipoColegio: string; // Clave foránea
-  comuna_id: string; // Clave foránea
+  idTipoColegio: string;
+  idComuna: string;
 }
 
-// No tiene atributos opcionales
-interface ColegioCreationAttributes extends Optional<ColegioAttributes, 'idColegio'> {}
+export type colegioPk = "idColegio";
+export type colegioId = colegio[colegioPk];
+export type colegioOptionalAttributes = "idColegio";
+export type colegioCreationAttributes = Optional<colegioAttributes, colegioOptionalAttributes>;
 
-// Clase del modelo Colegio
-export class Colegio extends Model<ColegioAttributes, ColegioCreationAttributes> implements ColegioAttributes {
-  public idColegio!: string;
-  public nombre!: string;
-  public idTipoColegio!: string;
-  public comuna_id!: string;
+export class colegio extends Model<colegioAttributes, colegioCreationAttributes> implements colegioAttributes {
+  idColegio!: string;
+  nombre!: string;
+  idTipoColegio!: string;
+  idComuna!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // colegio hasMany estudiante via idColegio
+  estudiantes!: estudiante[];
+  getEstudiantes!: Sequelize.HasManyGetAssociationsMixin<estudiante>;
+  setEstudiantes!: Sequelize.HasManySetAssociationsMixin<estudiante, estudianteId>;
+  addEstudiante!: Sequelize.HasManyAddAssociationMixin<estudiante, estudianteId>;
+  addEstudiantes!: Sequelize.HasManyAddAssociationsMixin<estudiante, estudianteId>;
+  createEstudiante!: Sequelize.HasManyCreateAssociationMixin<estudiante>;
+  removeEstudiante!: Sequelize.HasManyRemoveAssociationMixin<estudiante, estudianteId>;
+  removeEstudiantes!: Sequelize.HasManyRemoveAssociationsMixin<estudiante, estudianteId>;
+  hasEstudiante!: Sequelize.HasManyHasAssociationMixin<estudiante, estudianteId>;
+  hasEstudiantes!: Sequelize.HasManyHasAssociationsMixin<estudiante, estudianteId>;
+  countEstudiantes!: Sequelize.HasManyCountAssociationsMixin;
+  // colegio belongsTo comuna via idComuna
+  idComuna_comuna!: comuna;
+  getIdComuna_comuna!: Sequelize.BelongsToGetAssociationMixin<comuna>;
+  setIdComuna_comuna!: Sequelize.BelongsToSetAssociationMixin<comuna, comunaId>;
+  createIdComuna_comuna!: Sequelize.BelongsToCreateAssociationMixin<comuna>;
+  // colegio belongsTo tipoColegio via idTipoColegio
+  idTipoColegio_tipoColegio!: tipoColegio;
+  getIdTipoColegio_tipoColegio!: Sequelize.BelongsToGetAssociationMixin<tipoColegio>;
+  setIdTipoColegio_tipoColegio!: Sequelize.BelongsToSetAssociationMixin<tipoColegio, tipoColegioId>;
+  createIdTipoColegio_tipoColegio!: Sequelize.BelongsToCreateAssociationMixin<tipoColegio>;
 
-  // Métodos estáticos para definir asociaciones
-  static associate() {
-    // Relación con TipoColegio
-    Colegio.belongsTo(TipoColegio, {
-      foreignKey: 'idTipoColegio',
-      as: 'tipoColegio', // Alias para la relación
-    });
-
-    // Relación con Comuna
-    Colegio.belongsTo(Comuna, {
-      foreignKey: 'comuna_id',
-      as: 'comuna', // Alias para la relación
-    });
-  }
-}
-
-// Inicializar el modelo
-Colegio.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof colegio {
+    return colegio.init({
     idColegio: {
-      type: DataTypes.STRING(16),
-      primaryKey: true,
+      type: DataTypes.UUID,
       allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     nombre: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: false
     },
     idTipoColegio: {
-      type: DataTypes.STRING(16),
-      allowNull: false, // Clave foránea, no puede ser nula
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'tipoColegio',
+        key: 'idTipoColegio'
+      }
     },
-    comuna_id: {
-      type: DataTypes.STRING(16),
-      allowNull: false, // Clave foránea, no puede ser nula
-    },
-  },
-  {
-    sequelize, // Conexión configurada
-    modelName: 'Colegio', // Nombre del modelo
-    tableName: 'colegio', // Nombre de la tabla en la base de datos
-    timestamps: true, // Habilita createdAt y updatedAt
+    idComuna: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'comuna',
+        key: 'idComuna'
+      }
+    }
+  }, {
+    sequelize,
+    tableName: 'colegio',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "colegio_PK",
+        unique: true,
+        fields: [
+          { name: "idColegio" },
+        ]
+      },
+    ]
+  });
   }
-);
-
-// Exportar el modelo
-export default Colegio;
-
-
+}

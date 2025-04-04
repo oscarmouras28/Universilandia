@@ -1,64 +1,76 @@
+import * as Sequelize from 'sequelize';
 import { DataTypes, Model, Optional } from 'sequelize';
-import sequelize from '../config/db.js'; // Asegúrate de que este archivo configure correctamente la conexión a la base de datos
-import Pais from '../models/Pais.ts' ; // Asegúrate de que este archivo esté correctamente configurado y exportado
+import type { comuna, comunaId } from './comuna';
+import type { pais, paisId } from './pais';
 
-interface RegionAttributes {
+export interface regionAttributes {
   idRegion: string;
   nombreRegion: string;
   idPais: string;
 }
 
-//No tiene atributos opcionales
-interface RegionCreationAttributes extends Optional<RegionAttributes, 'idRegion'> {}
+export type regionPk = "idRegion";
+export type regionId = region[regionPk];
+export type regionOptionalAttributes = "idRegion";
+export type regionCreationAttributes = Optional<regionAttributes, regionOptionalAttributes>;
 
-//Clase del modelo Region
-export class Region extends Model<RegionAttributes, RegionCreationAttributes> implements RegionAttributes {
-  public idRegion!: string;
-  public nombreRegion!: string;
-  public idPais!: string;
+export class region extends Model<regionAttributes, regionCreationAttributes> implements regionAttributes {
+  idRegion!: string;
+  nombreRegion!: string;
+  idPais!: string;
 
-  // timestamps!
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  // region belongsTo pais via idPais
+  idPais_pai!: pais;
+  getIdPais_pai!: Sequelize.BelongsToGetAssociationMixin<pais>;
+  setIdPais_pai!: Sequelize.BelongsToSetAssociationMixin<pais, paisId>;
+  createIdPais_pai!: Sequelize.BelongsToCreateAssociationMixin<pais>;
+  // region hasMany comuna via idRegion
+  comunas!: comuna[];
+  getComunas!: Sequelize.HasManyGetAssociationsMixin<comuna>;
+  setComunas!: Sequelize.HasManySetAssociationsMixin<comuna, comunaId>;
+  addComuna!: Sequelize.HasManyAddAssociationMixin<comuna, comunaId>;
+  addComunas!: Sequelize.HasManyAddAssociationsMixin<comuna, comunaId>;
+  createComuna!: Sequelize.HasManyCreateAssociationMixin<comuna>;
+  removeComuna!: Sequelize.HasManyRemoveAssociationMixin<comuna, comunaId>;
+  removeComunas!: Sequelize.HasManyRemoveAssociationsMixin<comuna, comunaId>;
+  hasComuna!: Sequelize.HasManyHasAssociationMixin<comuna, comunaId>;
+  hasComunas!: Sequelize.HasManyHasAssociationsMixin<comuna, comunaId>;
+  countComunas!: Sequelize.HasManyCountAssociationsMixin;
 
-    // Métodos estáticos para definir asociaciones
-    static associate() {
-        // Relación con TipoColegio
-        Region.belongsTo(Pais, {
-          foreignKey: 'idPais',
-          as: 'pais', // Alias para la relación
-        });
-      }
-}
-
-//Inicializar el modelo
-Region.init(
-  {
+  static initModel(sequelize: Sequelize.Sequelize): typeof region {
+    return region.init({
     idRegion: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
-      primaryKey: true,
+      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      primaryKey: true
     },
     nombreRegion: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: false
     },
     idPais: {
-      type: DataTypes.STRING(16),
+      type: DataTypes.UUID,
       allowNull: false,
-    },
-  },
-  {
+      references: {
+        model: 'pais',
+        key: 'idPais'
+      }
+    }
+  }, {
     sequelize,
-    tableName: 'region', // Nombre de la tabla en la base de datos
-    modelName: 'Region',
-    timestamps: true, // Evitar que se creen los columnas createdAt y updatedAt
+    tableName: 'region',
+    schema: 'dbo',
+    timestamps: false,
+    indexes: [
+      {
+        name: "region_PK",
+        unique: true,
+        fields: [
+          { name: "idRegion" },
+        ]
+      },
+    ]
+  });
   }
-);
-
-//Exportar el modelo para ser utilizado en otros archivos.
-export default Region;
-
-
-
-
+}
