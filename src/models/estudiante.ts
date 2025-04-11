@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize';
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
+import type { Optional } from 'sequelize';
 import type { colegio, colegioId } from './colegio';
 import type { interesInsti, interesInstiId } from './interesInsti';
 import type { interesUni, interesUniId } from './interesUni';

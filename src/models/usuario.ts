@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize';
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
+import type { Optional } from 'sequelize';
 import type { comentario, comentarioId } from './comentario';
 import type { estudiante, estudianteId } from './estudiante';
 import type { likeBlog, likeBlogId } from './likeBlog';
@@ -82,30 +83,50 @@ export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes>
       type: DataTypes.UUID,
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
-      primaryKey: true
+      primaryKey: true,
+      validate:{
+        notNull: {msg: 'tanulo el id'}
+      }
     },
     correo: {
       type: DataTypes.STRING(150),
       allowNull: false,
-      unique: "UQ__usuario__2A586E0BBEB6FE17"
+      unique: "UQ__usuario__2A586E0BBEB6FE17",
+      validate:{
+        notNull: {msg: 'tanulo el correo'},
+        notEmpty: {msg: 'taempty el correo'}
+      }
     },
     password: {
       type: DataTypes.BLOB,
-      allowNull: false
+      allowNull: false,
+      validate:{
+        notNull: {msg: 'tanulo la pass'}
+      }
     },
     fechaCreacion: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('sysdatetime')
+      defaultValue: Sequelize.Sequelize.fn('sysdatetime'),
+      validate:{
+        notNull: {msg: 'tanulo la fecha'}
+      }
     },
     tipoUsuario: {
       type: DataTypes.STRING(30),
-      allowNull: false
+      allowNull: false,
+      validate:{
+        notNull: {msg: 'tanulo el tipo'},
+        notEmpty: {msg: 'taempty el tipo'}
+      }
     },
     activo: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true
+      defaultValue: true,
+      validate:{
+        notNull: {msg: 'tanulo el tipo'}
+      }
     }
   }, {
     sequelize,

@@ -12,7 +12,7 @@ COPY . .
 RUN npm install --omit=dev
 
 # 5️⃣ Exponer el puerto en el que corre el backend
-EXPOSE 5000
+EXPOSE 8080
 
 # 6️⃣ Definir el comando de inicio del backend
 CMD ["node", "dist/server.js"]

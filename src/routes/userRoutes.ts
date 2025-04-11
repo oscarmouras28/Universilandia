@@ -5,5 +5,7 @@ const router = express.Router()
 
 router.post('/register', createUsuario)
 router.get('/XD', getusuarios)
-
+router.delete('/delete/:id', deleteUsuario)
+router.put('/update/:id', updateUsuario)
+router.get('/getUser/:id', getUsuarioById)  
 export default router
