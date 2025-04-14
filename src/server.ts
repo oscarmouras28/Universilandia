@@ -1,10 +1,13 @@
 import express from 'express'
 import cors from 'cors'
 import userRoutes from './routes/userRoutes.js'
+import blogRoutes from './routes/blogRoutes.js'
+import comentarioRoutes from './routes/comentarioRoutes.js'
+import likeBlogRoutes from './routes/likeBlogRoutes.js'
 import dotenv from 'dotenv'
 import sequelize from './config/db.js'; // ✅ Importas la instancia de Sequelize
 import fs from 'fs';
-import { initModels } from './models/init-models.js';
+import { blog, comentario, initModels, likeBlog } from './models/init-models.js';
 
 
 
@@ -18,6 +21,15 @@ app.use(express.json())
 
 // Rutas
 app.use('/api/users', userRoutes)
+//se creo una ruta para blogs
+app.use('/api/blogs', blogRoutes)
+//se crea una ruta para comentario
+app.use('/api/comentarios', comentarioRoutes)
+//se crea una ruta para likes
+app.use('/api/likes', likeBlogRoutes)
+//se crea una ruta para suscripciones
+app.use('/api/suscripciones', userRoutes)
+
 
 const PORT = process.env.PORT || 8080
 
