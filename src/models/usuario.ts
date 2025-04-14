@@ -82,7 +82,7 @@ export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes>
     idUsuario: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      defaultValue: DataTypes.UUIDV4, // ✅ genera UUID en Node.js,
       primaryKey: true,
       validate:{
         notNull: {msg: 'tanulo el id'}
