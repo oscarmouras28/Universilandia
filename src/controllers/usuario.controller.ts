@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import sequelize from '../config/db.js'; // Asegúrate de que sea la instancia correcta
 import { usuario } from '../models/usuario.js'; // Asegúrate de usar la ruta correcta
 
 // Listar todos los usuarios
