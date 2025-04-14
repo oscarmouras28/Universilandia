@@ -4,6 +4,7 @@ import type { Optional } from 'sequelize';
 import type { comentario, comentarioId } from './comentario';
 import type { likeBlog, likeBlogId } from './likeBlog';
 
+
 export interface blogAttributes {
   idBlog: string;
   contenido: string;
@@ -48,8 +49,11 @@ export class blog extends Model<blogAttributes, blogCreationAttributes> implemen
     idBlog: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
-      primaryKey: true
+      defaultValue: DataTypes.UUIDV4, // ✅ genera UUID en Node.js,
+      primaryKey: true,
+      validate:{
+        notNull: {msg: 'El idBlog esta llegando nulo',}
+      }
     },
     contenido: {
       type: DataTypes.STRING(255),

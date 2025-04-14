@@ -25,38 +25,24 @@ export const getUsuarioById = async (req: Request, res: Response) => {
   }
 };
 
-
+// Crear un nuevo usuario con clave parceada a blob
 export const createUsuario = async (req: Request, res: Response) => {
-  console.log('📥 Datos recibidos:', req.body);
-
   try {
     const { correo, password, tipoUsuario, activo } = req.body;
 
-    // 1. Construye el usuario (sin guardar aún)
-    const nuevoUsuario = usuario.build({
+    const nuevoUsuario = await usuario.create({
       correo,
       password: Buffer.from(password),
       tipoUsuario,
-      activo
+      activo,
     });
 
-    console.log('🛠️ Usuario construido (antes de guardar):', nuevoUsuario.toJSON());
-
-    // 2. Guarda el usuario en la BD
-    await nuevoUsuario.save();
-
-    console.log('✅ Usuario guardado exitosamente');
     res.status(201).json(nuevoUsuario);
   } catch (error: any) {
-    console.error('❌ Error al guardar el usuario:', error);
-    res.status(500).json({
-      error: 'Error al crear el usuario',
-      detalles: error.message,
-      stack: error.stack
-    });
+    console.error('Error al crear el usuario:', error); 
+    res.status(500).json({ error: 'Error al crear el usuario',detalle: error.message });
   }
 };
-
 
 // Actualizar un usuario existente
 export const updateUsuario = async (req: Request, res: Response) => {
@@ -78,8 +64,9 @@ export const deleteUsuario = async (req: Request, res: Response) => {
   try {
     const Usuario = await usuario.findByPk(req.params.id);
     if (Usuario) {
+      const correo = Usuario.correo; // Obtener el correo del usuario antes de eliminarlo
       await Usuario.destroy();
-      res.status(204).send();
+      res.status(200).json({ message: `Usuario con correo ${correo} eliminado exitosamente` });
     } else {
       res.status(404).json({ error: 'Usuario no encontrado' });
     }
