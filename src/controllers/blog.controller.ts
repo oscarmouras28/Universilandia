@@ -56,3 +56,17 @@ export const updateBlog = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error al actualizar el blog' });
   }
 };
+// Eliminar un blog existente
+export const deleteBlog = async (req: Request, res: Response) => {
+  try {
+    const blogPost = await blog.findByPk(req.params.id);
+    if (blogPost) {
+      await blogPost.destroy();
+      res.json({ message: 'Blog eliminado' });
+    } else {
+      res.status(404).json({ error: 'Blog no encontrado' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el blog' });
+  }
+};
