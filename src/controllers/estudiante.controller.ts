@@ -33,7 +33,7 @@ export const createEstudiante = async (req: Request, res: Response) => {
             idColegio,
             idNivelEducacional,
         });
-        res.status(201).json(nuevoEstudiante);
+        res.status(201).json({ message: 'Estudiante creado exitosamente', estudiante: nuevoEstudiante });
     } catch (error: any) {
         console.error('Error al crear el estudiante:', error); 
         res.status(500).json({ error: 'Error al crear el estudiante', detalle: error.message });
@@ -43,11 +43,22 @@ export const createEstudiante = async (req: Request, res: Response) => {
 // Listar todos los estudiantes
 export const getEstudiantes = async (req: Request, res: Response) => {
     try {
-        const estudiantes = await estudiante.findAll({
-            include: ['usuario'],
-        });
+        const estudiantes = await estudiante.findAll();
         res.json(estudiantes);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener los estudiantes' });
+    }
+};
+// Obtener un estudiante por ID
+export const getEstudainteId = async (req: Request, res: Response) => {
+    try {
+        const estudianteId = await estudiante.findByPk(req.params.id);
+        if (estudianteId) {
+            res.json(estudianteId);
+        } else {
+            res.status(404).json({ error: 'Estudiante no encontrado' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener el estudiante' });
     }
 };
