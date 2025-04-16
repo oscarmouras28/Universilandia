@@ -15,8 +15,9 @@ export const getComentarios = async (req: Request, res: Response) => {
 export const getComentarioById = async (req: Request, res: Response) => {
     try {
         const Comentario = await comentario.findByPk(req.params.id);
-        if (comentario) {
-            res.json(comentario);
+        if (Comentario) {
+            res.json(Comentario);
+            res.json({ message: 'Comentario encontrado con exito' });
         } else {
             res.status(404).json({ error: 'Comentario no encontrado' });
         }
@@ -49,7 +50,8 @@ export const updateComentario = async (req: Request, res: Response) => {
         const Comentario = await comentario.findByPk(req.params.id);
         if (Comentario) {
             await Comentario.update(req.body);
-            res.json(comentario);
+            res.json(Comentario);
+            res.json({ message: 'Comentario actualizado con exito' });
         } else {
             res.status(404).json({ error: 'Comentario no encontrado' });
         }

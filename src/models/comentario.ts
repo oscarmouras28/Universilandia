@@ -40,7 +40,7 @@ export class comentario extends Model<comentarioAttributes, comentarioCreationAt
     idComentario: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      defaultValue: DataTypes.UUIDV4, // ✅ genera UUID en Node.js,
       primaryKey: true
     },
     contenido: {
