@@ -28,8 +28,9 @@ export const getBlogById = async (req: Request, res: Response) => {
 // Crear un nuevo blog
 export const createBlog = async (req: Request, res: Response) => {
   try {
+    console.log('💬 Body recibido:', req.body);
     const { contenido } = req.body;
-
+    console.log('✍️ Largo del contenido:', contenido?.length);
     const nuevoBlog = await blog.create({
       contenido,
     });
