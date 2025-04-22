@@ -98,10 +98,10 @@ export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes>
       }
     },
     password: {
-      type: DataTypes.BLOB,
+      type: DataTypes.STRING(255),
       allowNull: false,
-      validate:{
-        notNull: {msg: 'tanulo la pass'}
+      validate: {
+        notNull: { msg: 'tanulo la pass' }
       }
     },
     fechaCreacion: {

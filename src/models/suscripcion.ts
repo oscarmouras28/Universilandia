@@ -34,7 +34,7 @@ export class suscripcion extends Model<suscripcionAttributes, suscripcionCreatio
     idSuscripcion: {
       type: DataTypes.UUID,
       allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+      defaultValue: DataTypes.UUIDV4, // ✅ genera UUID en Node.js,
       primaryKey: true
     },
     fechaInicio: {
