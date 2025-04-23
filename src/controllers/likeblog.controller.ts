@@ -29,6 +29,7 @@ export const getLikesBlog = async (req: Request, res: Response) => {
 //     }
 // };
 // Crear un nuevo like
+
 export const createLikeBlog = async (req: Request, res: Response) => {
     try {
         const { idBlog, idUsuario } = req.body;

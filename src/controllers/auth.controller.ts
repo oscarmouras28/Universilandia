@@ -12,6 +12,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const user = await usuario.findOne({ where: { correo } });
 
     if (!user) {
+
       res.status(401).json({ error: 'Usuario no encontrado' });
       return;
     }
@@ -21,6 +22,14 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     if (!match) {
       res.status(401).json({ error: 'Contraseña incorrecta' });
       return;
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    const match = await bcrypt.compare(password, user.password.toString());
+
+    if (!match) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+
     }
 
     const token = jwt.sign(
@@ -44,5 +53,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error('Error en login:', err);
     res.status(500).json({ error: 'Error al iniciar sesión' });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Error al iniciar sesión', detalle: err.message });
   }
 };
