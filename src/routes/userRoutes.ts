@@ -1,11 +1,11 @@
 import express from 'express'
 import { getusuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario} from '../controllers/usuario.controller.js'
 import { loginUser } from '../controllers/auth.controller'
+import { verificarToken } from '../middleware/authMiddleware.js'
 
 
 const router = express.Router()
 
-router.post('/login', loginUser)
 // No overload matches this call.
 //   The last overload gave the following error.
 //     Argument of type '(req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>' is not assignable to parameter of type 'Application<Record<string, any>>'.
@@ -18,4 +18,5 @@ router.get('/listar', getusuarios)
 router.delete('/delete/:id', deleteUsuario)
 router.put('/update/:id', updateUsuario)
 router.get('/getUser/:id', getUsuarioById)
+router.post('/login', loginUser)
 export default router

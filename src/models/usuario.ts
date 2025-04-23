@@ -9,7 +9,7 @@ import type { suscripcion, suscripcionId } from './suscripcion';
 export interface usuarioAttributes {
   idUsuario: string;
   correo: string;
-  password: any;
+  password: string;
   fechaCreacion: Date;
   tipoUsuario: string;
   activo: boolean;
@@ -23,7 +23,7 @@ export type usuarioCreationAttributes = Optional<usuarioAttributes, usuarioOptio
 export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes> implements usuarioAttributes {
   idUsuario!: string;
   correo!: string;
-  password!: any;
+  password!: string;
   fechaCreacion!: Date;
   tipoUsuario!: string;
   activo!: boolean;
@@ -98,7 +98,7 @@ export class usuario extends Model<usuarioAttributes, usuarioCreationAttributes>
       }
     },
     password: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notNull: { msg: 'tanulo la pass' }
