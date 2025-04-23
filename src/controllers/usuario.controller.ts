@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { usuario } from '../models/usuario.js'; // Asegúrate de usar la ruta correcta
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs'; // en vez de 'bcrypt'
 
 // Listar todos los usuarios
 export const getusuarios = async (req: Request, res: Response) => {
@@ -30,10 +30,10 @@ export const getUsuarioById = async (req: Request, res: Response) => {
 export const createUsuario = async (req: Request, res: Response) => {
   try {
     const { correo, password, tipoUsuario, activo } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10); // Hashear la contraseña
     const nuevoUsuario = await usuario.create({
       correo,
-      password: hashedPassword,
+      password: hashedPassword, // Guardar la contraseña hasheada
       tipoUsuario,
       activo,
     });
