@@ -10,6 +10,7 @@ import dotenv from 'dotenv'
 import sequelize from './config/db.js'; // ✅ Importas la instancia de Sequelize
 import { blog, comentario, initModels, likeBlog, suscripcion } from './models/init-models.js';
 import pagoRoutes from './routes/pagoRoutes.js';
+import transaccionRoutes from './routes/transaccionRoutes.js';
 
 
 dotenv.config()
@@ -34,6 +35,8 @@ app.use('/api/suscripciones', suscripcionRoutes)
 app.use('/api/estudiantes', estudianteRoutes)
 //se crea una ruta para pagos
 app.use('/api/pagos', pagoRoutes);
+//se crea una ruta para transacciones
+app.use('/api/transacciones', transaccionRoutes);
 
 
 const PORT = process.env.PORT || 8080

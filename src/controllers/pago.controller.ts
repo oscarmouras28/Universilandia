@@ -25,7 +25,7 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
         auto_return: 'approved',
       },
     });
-
+    console.log('✅ Preferencia creada:', preference);
     res.status(200).json({ init_point: preference.init_point });
   } catch (error) {
     console.error('❌ Error al crear preferencia de pago:', error);

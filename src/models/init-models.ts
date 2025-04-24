@@ -37,6 +37,8 @@ import { suscripcion as _suscripcion } from "./suscripcion.js";
 import type { suscripcionAttributes, suscripcionCreationAttributes } from "./suscripcion.js";
 import { tipoColegio as _tipoColegio } from "./tipoColegio.js";
 import type { tipoColegioAttributes, tipoColegioCreationAttributes } from "./tipoColegio.js";
+import { transaccion as _transaccion } from "./transaccion.js";
+import type { transaccionAttributes, transaccionCreationAttributes } from "./transaccion.js";
 import { universidad as _universidad } from "./universidad.js";
 import type { universidadAttributes, universidadCreationAttributes } from "./universidad.js";
 import { usuario as _usuario } from "./usuario.js";
@@ -64,6 +66,7 @@ export {
   _tipoColegio as tipoColegio,
   _universidad as universidad,
   _usuario as usuario,
+  _transaccion as transaccion
 };
 
 export type {
@@ -109,6 +112,8 @@ export type {
   universidadCreationAttributes,
   usuarioAttributes,
   usuarioCreationAttributes,
+  transaccionAttributes,
+  transaccionCreationAttributes,
 };
 
 export function initModels(sequelize: Sequelize) {
@@ -133,6 +138,7 @@ export function initModels(sequelize: Sequelize) {
   const tipoColegio = _tipoColegio.initModel(sequelize);
   const universidad = _universidad.initModel(sequelize);
   const usuario = _usuario.initModel(sequelize);
+  const transaccion = _transaccion.initModel(sequelize);
 
   comentario.belongsTo(blog, { as: "idBlog_blog", foreignKey: "idBlog"});
   blog.hasMany(comentario, { as: "comentarios", foreignKey: "idBlog"});
@@ -178,6 +184,9 @@ export function initModels(sequelize: Sequelize) {
   usuario.hasMany(likeBlog, { as: "likeBlogs", foreignKey: "idUsuario"});
   suscripcion.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario"});
   usuario.hasMany(suscripcion, { as: "suscripcions", foreignKey: "idUsuario"});
+  transaccion.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario" });
+  usuario.hasMany(transaccion, { as: "transacciones", foreignKey: "idUsuario" });
+
 
   return {
     blog: blog,
@@ -201,5 +210,6 @@ export function initModels(sequelize: Sequelize) {
     tipoColegio: tipoColegio,
     universidad: universidad,
     usuario: usuario,
+    transaccion: transaccion,
   };
 }
