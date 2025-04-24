@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import { blog } from '../models/blog.js';
 import { likeBlog } from '../models/likeBlog.js'; 
 import { usuario } from '../models/usuario.js';
 
