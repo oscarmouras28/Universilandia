@@ -5,6 +5,9 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.SECRET_KEY || 'supersecreto';
 
+// Función para registrar un nuevo usuario
+//Login User Controller 
+
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { correo, password } = req.body;
 
