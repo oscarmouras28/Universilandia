@@ -23,5 +23,11 @@ export const validarLoginInput = (req: Request, res: Response, next: NextFunctio
     return;
   }
 
+  //validacion de captcha
+
+
+
   next(); // ✅ Si todo está bien, sigue al controlador loginUser que seria auth.controller.ts
 };
+
+

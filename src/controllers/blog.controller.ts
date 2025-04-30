@@ -1,5 +1,8 @@
 import type { Request, Response } from 'express';
 import { blog } from '../models/blog.js'; // Asegúrate de usar la ruta correcta
+import { validationResult } from 'express-validator'; 
+
+//listar, obtener por ID los demas se hacen por BD.
 
 //listar todos los blogs
 export const getblogs = async (req: Request, res: Response) => {
@@ -22,52 +25,5 @@ export const getBlogById = async (req: Request, res: Response) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener el blog' });
-  }
-};
-
-// Crear un nuevo blog
-export const createBlog = async (req: Request, res: Response) => {
-  try {
-    console.log('💬 Body recibido:', req.body);
-    const { contenido } = req.body;
-    console.log('✍️ Largo del contenido:', contenido?.length);
-    const nuevoBlog = await blog.create({
-      contenido,
-    });
-
-    res.status(201).json(nuevoBlog);
-  } catch (error: any) {
-    console.error('Error al crear el blog:', error); 
-    res.status(500).json({ error: 'Error al crear el blog', detalle: error.message });
-  }
-};
-
-// Actualizar un blog existente
-
-export const updateBlog = async (req: Request, res: Response) => {
-  try {
-    const blogPost = await blog.findByPk(req.params.id);
-    if (blogPost) {
-      await blogPost.update(req.body);
-      res.json(blogPost);
-    } else {
-      res.status(404).json({ error: 'Blog no encontrado' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el blog' });
-  }
-};
-// Eliminar un blog existente
-export const deleteBlog = async (req: Request, res: Response) => {
-  try {
-    const blogPost = await blog.findByPk(req.params.id);
-    if (blogPost) {
-      await blogPost.destroy();
-      res.json({ message: 'Blog eliminado' });
-    } else {
-      res.status(404).json({ error: 'Blog no encontrado' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el blog' });
   }
 };
