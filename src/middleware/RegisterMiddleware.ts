@@ -17,13 +17,15 @@ export const validarRegisterInput = (req: Request, res: Response, next: NextFunc
   }
 
   // Validar longitud mínima de contraseña
+  //La contraseña debe contener una letra mayúscula, una letra minúscula, un número y un carácter especial.
+
   if (password.length < 6) {
     res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
     return;
   }
 
   // Validar tipoUsuario permitido
-  const tiposPermitidos = ['admin', 'user', 'premium'];
+  const tiposPermitidos = ['admin'];
   if (!tiposPermitidos.includes(tipoUsuario)) {
     res.status(400).json({ error: `Tipo de usuario inválido. Debe ser uno de: ${tiposPermitidos.join(', ')}` });
     return;
