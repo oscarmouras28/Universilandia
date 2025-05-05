@@ -11,7 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "typeRoots": ["node_modules/@types", "src/types"],
+    "typeRoots": ["node_modules/@types", "backend/src/types"],
 
     // 🔥 Reglas clave para compatibilidad de imports:
     "verbatimModuleSyntax": true,
