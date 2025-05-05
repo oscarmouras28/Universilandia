@@ -4,114 +4,142 @@ import { blog } from "../models/blog.js";
 import { validationResult } from "express-validator";
 import { validate as uuidValidate } from "uuid";
 
-
 interface RequestConUsuario extends Request {
-    usuario?: {
-      idUsuario: string;
-      tipoUsuario: string;
-    };
-  }
-  
+  usuario?: {
+    idUsuario: string;
+    tipoUsuario: string;
+  };
+}
 
 // Crear comentario
-export const crearComentario = async (req: RequestConUsuario, res: Response) => {
+export const crearComentario = async (req: RequestConUsuario, res: Response): Promise<void> => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const { contenido, idBlog } = req.body;
   const usuarioId = req.usuario?.idUsuario;
 
-  if (!uuidValidate(idBlog)) return res.status(400).json({ error: "ID de blog inválido" });
+  if (!usuarioId) {
+    res.status(401).json({ error: "Usuario no autenticado" });
+    return;
+  }
+
+  if (!uuidValidate(idBlog)) {
+    res.status(400).json({ error: "ID de blog inválido" });
+    return;
+  }
 
   try {
     const Blog = await blog.findByPk(idBlog);
-    if (!Blog) return res.status(404).json({ error: "Blog no encontrado" });
+    if (!Blog) {
+      res.status(404).json({ error: "Blog no encontrado" });
+      return;
+    }
 
     const nuevoComentario = await comentario.create({
       contenido: contenido.trim(),
       idBlog,
-      idUsuario: usuarioId!,
+      idUsuario: usuarioId,
     });
 
-    return res.status(201).json(nuevoComentario);
+    res.status(201).json(nuevoComentario);
   } catch (error) {
     console.error("Error al crear comentario:", error);
-    return res.status(500).json({ error: "Error interno al crear comentario" });
+    res.status(500).json({ error: "Error interno al crear comentario" });
   }
 };
 
 // Obtener comentarios de un blog
-export const obtenerComentariosDeBlog = async (req: Request, res: Response) => {
+export const obtenerComentariosDeBlog = async (req: Request, res: Response): Promise<void> => {
   const { idBlog } = req.params;
 
-  if (!uuidValidate(idBlog)) return res.status(400).json({ error: "ID de blog inválido" });
+  if (!uuidValidate(idBlog)) {
+    res.status(400).json({ error: "ID de blog inválido" });
+    return;
+  }
 
   try {
     const comentarios = await comentario.findAll({
       where: { idBlog },
-      order: [['createdAt', 'DESC']]
+      order: [["createdAt", "DESC"]],
     });
 
-    return res.status(200).json(comentarios);
+    res.status(200).json(comentarios);
   } catch (error) {
     console.error("Error al obtener comentarios:", error);
-    return res.status(500).json({ error: "Error interno al obtener comentarios" });
+    res.status(500).json({ error: "Error interno al obtener comentarios" });
   }
 };
 
 // Editar comentario
-export const actualizarComentario = async (req: RequestConUsuario, res: Response) => {
+export const actualizarComentario = async (req: RequestConUsuario, res: Response): Promise<void> => {
   const { id } = req.params;
   const { contenido } = req.body;
   const usuarioId = req.usuario?.idUsuario;
   const tipoUsuario = req.usuario?.tipoUsuario;
 
-  if (!uuidValidate(id)) return res.status(400).json({ error: "ID inválido" });
+  if (!uuidValidate(id)) {
+    res.status(400).json({ error: "ID inválido" });
+    return;
+  }
 
   if (!contenido || contenido.trim().length < 5) {
-    return res.status(400).json({ error: "Contenido muy corto" });
+    res.status(400).json({ error: "Contenido muy corto" });
+    return;
   }
 
   try {
     const Comentario = await comentario.findByPk(id);
+    if (!Comentario) {
+      res.status(404).json({ error: "Comentario no encontrado" });
+      return;
+    }
 
-    if (!Comentario) return res.status(404).json({ error: "Comentario no encontrado" });
-
-    if (Comentario.idUsuario !== usuarioId && tipoUsuario !== 'admin') {
-      return res.status(403).json({ error: "No autorizado para editar este comentario" });
+    if (Comentario.idUsuario !== usuarioId && tipoUsuario !== "admin") {
+      res.status(403).json({ error: "No autorizado para editar este comentario" });
+      return;
     }
 
     Comentario.contenido = contenido.trim();
     await Comentario.save();
 
-    return res.status(200).json(comentario);
+    res.status(200).json(Comentario);
   } catch (error) {
     console.error("Error al actualizar comentario:", error);
-    return res.status(500).json({ error: "Error interno al actualizar comentario" });
+    res.status(500).json({ error: "Error interno al actualizar comentario" });
   }
 };
 
 // Eliminar comentario
-export const eliminarComentario = async (req: RequestConUsuario, res: Response) => {
+export const eliminarComentario = async (req: RequestConUsuario, res: Response): Promise<void> => {
   const { id } = req.params;
   const usuarioId = req.usuario?.idUsuario;
   const tipoUsuario = req.usuario?.tipoUsuario;
 
-  if (!uuidValidate(id)) return res.status(400).json({ error: "ID inválido" });
+  if (!uuidValidate(id)) {
+    res.status(400).json({ error: "ID inválido" });
+    return;
+  }
 
   try {
     const Comentario = await comentario.findByPk(id);
+    if (!Comentario) {
+      res.status(404).json({ error: "Comentario no encontrado" });
+      return;
+    }
 
-    if (!Comentario) return res.status(404).json({ error: "Comentario no encontrado" });
-
-    if (Comentario.idUsuario !== usuarioId && tipoUsuario !== 'admin') {
-      return res.status(403).json({ error: "No autorizado para eliminar este comentario" });
+    if (Comentario.idUsuario !== usuarioId && tipoUsuario !== "admin") {
+      res.status(403).json({ error: "No autorizado para eliminar este comentario" });
+      return;
     }
 
     await Comentario.destroy();
-    return res.status(200).json({ message: "Comentario eliminado correctamente" });
+    res.status(200).json({ message: "Comentario eliminado correctamente" });
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
-    return res.status(500).json({ error: "Error interno al eliminar comentario" });
+    res.status(500).json({ error: "Error interno al eliminar comentario" });
   }
 };

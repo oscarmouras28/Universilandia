@@ -1,13 +1,12 @@
 import express from 'express'
-import { createComentario, getComentarios, updateComentario, deleteComentario,getComentarioById } from '../controllers/comentario.controller.js';
+import {actualizarComentario, crearComentario, eliminarComentario, obtenerComentariosDeBlog} from '../controllers/comentario.controller.js';
 
 const router = express.Router()
 
 
-router.post('/create', createComentario);
-router.get('/listar', getComentarios);
-router.put('/update/:id', updateComentario);
-router.delete('/delete/:id', deleteComentario);
-router.get('/getComentario/:id', getComentarioById); 
+router.post('/create', crearComentario);
+router.get('/listar', obtenerComentariosDeBlog);
+router.delete('/delete/:id', eliminarComentario);
+router.get('/getComentario/:id', obtenerComentariosDeBlog); 
 
 export default router;
