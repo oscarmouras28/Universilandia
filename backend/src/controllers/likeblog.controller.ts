@@ -3,15 +3,11 @@ import { likeBlog } from "../models/likeBlog.js";
 import { blog } from "../models/blog.js";
 import { validate as uuidValidate } from "uuid";
 
-interface RequestConUsuario extends Request {
-  usuario?: {
-    idUsuario: string;
-  };
-}
 
-export const darLike = async (req: RequestConUsuario, res: Response): Promise<void> => {
+
+export const darLike = async (req: Request, res: Response): Promise<void> => {
   const { idBlog } = req.body;
-  const usuarioId = req.usuario?.idUsuario;
+  const usuarioId = (req.user as { idUsuario: string })?.idUsuario;
 
   if (!usuarioId) {
     res.status(401).json({ error: "Usuario no autenticado" });
@@ -49,9 +45,9 @@ export const darLike = async (req: RequestConUsuario, res: Response): Promise<vo
 };
 
 
-export const quitarLike = async (req: RequestConUsuario, res: Response): Promise<void>  => {
-    const { idBlog } = req.params;
-    const usuarioId = req.usuario?.idUsuario;
+export const quitarLike = async (req: Request, res: Response): Promise<void>  => {
+    const { idBlog } = req.body;
+    const usuarioId = (req.user as { idUsuario: string })?.idUsuario;
 
     if (!usuarioId) {
         res.status(401).json({ error: "Usuario no autenticado" });

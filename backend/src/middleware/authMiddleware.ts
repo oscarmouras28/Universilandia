@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.SECRET_KEY || 'supersecreto';
 
+interface JwtPayload {
+  idUsuario: string;
+  tipoUsuario: string;
+}
 export const verificarToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const token = req.headers['authorization']?.split(' ')[1];
 
@@ -12,9 +16,8 @@ export const verificarToken = async (req: Request, res: Response, next: NextFunc
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    // 👇 para que TypeScript no se queje luego, le indicas el tipo correcto
-    (req as any).user = decoded;
+    const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ error: 'Token inválido' });

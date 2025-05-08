@@ -15,15 +15,26 @@ export const getblogs = async (req: Request, res: Response) => {
 };
 
 // Obtener un blog por ID
-export const getBlogById = async (req: Request, res: Response) => {
-  try {
-    const blogPost = await blog.findByPk(req.params.id);
-    if (blogPost) {
-      res.json(blogPost);
-    } else {
-      res.status(404).json({ error: 'Blog no encontrado' });
+export const getBlogById = (req: Request, res: Response): Promise<void> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({ error: 'ID del blog es requerido' });
+        return resolve();
+      }
+
+      const blogPost = await blog.findByPk(id);
+      if (blogPost) {
+        res.json(blogPost);
+      } else {
+        res.status(404).json({ error: 'Blog no encontrado' });
+      }
+      resolve();
+    } catch (error) {
+      console.error('Error al obtener el blog:', error);
+      res.status(500).json({ error: 'Error al obtener el blog' });
+      reject(error);
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el blog' });
-  }
+  });
 };

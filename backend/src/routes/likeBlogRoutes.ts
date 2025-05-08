@@ -8,7 +8,7 @@ import { contarLikesPorBlog } from '../controllers/likeblog.controller.js'
 const router = express.Router()
 //Ruta para agregar un like a un blog 
 router.post(
-    "/",
+    "/like",
     verificarToken, //verifica que el usuario esté autenticado
     validarLike,     // valida que blogId exista y sea UUID
     validarCampos,      // revisa errores de validaciones anteriores
@@ -17,7 +17,7 @@ router.post(
   
   // Ruta para quitar like a un blog
   router.delete(
-    "/:blogId",
+    "/:idBlog",
     verificarToken,
     validarLike,  // valida que blogId sea UUID y no esté vacío
     validarCampos,
