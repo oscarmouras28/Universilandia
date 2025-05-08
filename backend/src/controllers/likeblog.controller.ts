@@ -46,7 +46,7 @@ export const darLike = async (req: Request, res: Response): Promise<void> => {
 
 
 export const quitarLike = async (req: Request, res: Response): Promise<void>  => {
-    const { idBlog } = req.body;
+    const { idBlog } = req.params;
     const usuarioId = (req.user as { idUsuario: string })?.idUsuario;
 
     if (!usuarioId) {

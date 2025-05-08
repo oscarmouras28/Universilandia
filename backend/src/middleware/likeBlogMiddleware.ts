@@ -1,10 +1,10 @@
 import type{ Request, Response, NextFunction } from "express";
 
 export const validarLike = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { idBlog } = req.body;
+  const idBlog = req.body.idBlog || req.params.idBlog;
 
   if (!idBlog) {
-    res.status(400).json({ error: "El blogId es obligatorio" });
+    res.status(400).json({ error: "El idBlog es obligatorio" });
     return;
   }
 
@@ -17,5 +17,6 @@ export const validarLike = async (req: Request, res: Response, next: NextFunctio
 
   next();
 };
+
 
 
