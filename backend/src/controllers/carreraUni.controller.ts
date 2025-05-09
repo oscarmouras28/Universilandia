@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { carreraUni } from '../models/carreraUni.js';
-import { universidad } from '../models/universidad.js';
 
 
 // Obtener todas las carreras universitarias con su universidad

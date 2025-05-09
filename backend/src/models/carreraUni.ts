@@ -9,12 +9,14 @@ export interface carreraUniAttributes {
   modalidad?: number;
   arancel?: number;
   semestres?: number;
+  descripcion?: string; // 👈 nuevo campo
   idUniversidad: string;
 }
 
 export type carreraUniPk = "idCarrUni";
 export type carreraUniId = carreraUni[carreraUniPk];
-export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres";
+export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres" | "descripcion"; // 👈 agregado
+
 export type carreraUniCreationAttributes = Optional<carreraUniAttributes, carreraUniOptionalAttributes>;
 
 export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAttributes> implements carreraUniAttributes {
@@ -23,6 +25,7 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
   modalidad?: number;
   arancel?: number;
   semestres?: number;
+  descripcion?: string;
   idUniversidad!: string;
 
   // carreraUni belongsTo universidad via idUniversidad
@@ -33,50 +36,52 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
 
   static initModel(sequelize: Sequelize.Sequelize): typeof carreraUni {
     return carreraUni.init({
-    idCarrUni: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
-      primaryKey: true
-    },
-    nombreCarrera: {
-      type: DataTypes.STRING(50),
-      allowNull: false
-    },
-    modalidad: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    arancel: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    semestres: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    idUniversidad: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'universidad',
-        key: 'idUniversidad'
-      }
-    }
-  }, {
-    sequelize,
-    tableName: 'carreraUni',
-    schema: 'dbo',
-    timestamps: false,
-    indexes: [
-      {
-        name: "carrera_PK",
-        unique: true,
-        fields: [
-          { name: "idCarrUni" },
-        ]
+      idCarrUni: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+        primaryKey: true
       },
-    ]
-  });
+      nombreCarrera: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+      },
+      modalidad: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
+      arancel: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
+      semestres: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+      },
+      descripcion: {
+        type: DataTypes.STRING(500), // 👈 aquí defines la columna
+        allowNull: true
+      },
+      idUniversidad: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'universidad',
+          key: 'idUniversidad'
+        }
+      }
+    }, {
+      sequelize,
+      tableName: 'carreraUni',
+      schema: 'dbo',
+      timestamps: false,
+      indexes: [
+        {
+          name: "carrera_PK",
+          unique: true,
+          fields: [{ name: "idCarrUni" }]
+        },
+      ]
+    });
   }
 }
