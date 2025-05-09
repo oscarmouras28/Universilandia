@@ -1,0 +1,10 @@
+@import "@fontsource/poppins";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-white antialiased;
+    font-family: 'Poppins', sans-serif;
+}
