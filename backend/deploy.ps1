@@ -24,4 +24,4 @@ $serviceUrl = gcloud run services describe universilandia-backend `
   --platform managed `
   --region southamerica-west1 `
   --format "value(status.url)"
-Start-Process $serviceUrl
+Start-Process $serviceUrlk

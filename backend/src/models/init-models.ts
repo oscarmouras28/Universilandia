@@ -43,6 +43,8 @@ import { universidad as _universidad } from "./universidad.js";
 import type { universidadAttributes, universidadCreationAttributes } from "./universidad.js";
 import { usuario as _usuario } from "./usuario.js";
 import type { usuarioAttributes, usuarioCreationAttributes } from "./usuario.js";
+import { tokenInvalidado as _tokenInvalidado } from './tokenInvalidado.js';
+import type { tokenInvalidadoAttributes, tokenInvalidadoCreationAttributes } from './tokenInvalidado.js';
 
 export {
   _blog as blog,
@@ -66,7 +68,8 @@ export {
   _tipoColegio as tipoColegio,
   _universidad as universidad,
   _usuario as usuario,
-  _transaccion as transaccion
+  _transaccion as transaccion,
+  _tokenInvalidado as tokenInvalidado,
 };
 
 export type {
@@ -114,6 +117,8 @@ export type {
   usuarioCreationAttributes,
   transaccionAttributes,
   transaccionCreationAttributes,
+  tokenInvalidadoAttributes,
+  tokenInvalidadoCreationAttributes,
 };
 
 export function initModels(sequelize: Sequelize) {
@@ -139,6 +144,7 @@ export function initModels(sequelize: Sequelize) {
   const universidad = _universidad.initModel(sequelize);
   const usuario = _usuario.initModel(sequelize);
   const transaccion = _transaccion.initModel(sequelize);
+  const tokenInvalidado = _tokenInvalidado.initModel(sequelize);
 
   comentario.belongsTo(blog, { as: "idBlog_blog", foreignKey: "idBlog"});
   blog.hasMany(comentario, { as: "comentarios", foreignKey: "idBlog"});
@@ -186,6 +192,7 @@ export function initModels(sequelize: Sequelize) {
   usuario.hasMany(suscripcion, { as: "suscripcions", foreignKey: "idUsuario"});
   transaccion.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario" });
   usuario.hasMany(transaccion, { as: "transacciones", foreignKey: "idUsuario" });
+  
 
 
   return {
@@ -211,5 +218,6 @@ export function initModels(sequelize: Sequelize) {
     universidad: universidad,
     usuario: usuario,
     transaccion: transaccion,
+    tokenInvalidado: tokenInvalidado,
   };
 }

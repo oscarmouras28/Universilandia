@@ -4,6 +4,7 @@ import { loginUser } from '../controllers/auth.controller.js'
 import { verificarToken, esAdmin } from '../middleware/authMiddleware.js'
 import { validarLoginInput } from '../middleware/LoginMiddleware.js'
 import { validarRegisterInput } from '../middleware/RegisterMiddleware.js'
+import { logoutUser } from '../controllers/logOut.controller.js'
 
 
 const router = express.Router()
@@ -14,4 +15,5 @@ router.delete('/delete/:id', deleteUsuario)
 router.put('/update/:id',verificarToken ,esAdmin, updateUsuario)
 router.get('/getUser/:id', getUsuarioById)
 router.post('/login',validarLoginInput, loginUser)
+router.post('/logout', verificarToken, logoutUser); // ← solo usuarios autenticados pueden cerrar sesión
 export default router
