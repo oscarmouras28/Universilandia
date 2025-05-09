@@ -1,11 +1,18 @@
-import { Navigate } from "react-router-dom";
+// ProtectedRoute.tsx
+import { Navigate, useLocation } from "react-router-dom";
+import { ReactNode } from "react";
 
-export default function ProtectedRoute({
-  children,
-}: {
-  children: JSX.Element;
-}) {
+interface Props {
+  children: ReactNode;
+}
+
+export default function ProtectedRoute({ children }: Props) {
   const token = localStorage.getItem("token");
+  const location = useLocation();
 
-  return token ? children : <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
 }
