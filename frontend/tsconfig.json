@@ -9,6 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client", "react", "react-dom"],
     "module": "ESNext",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
