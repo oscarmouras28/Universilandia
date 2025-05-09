@@ -9,14 +9,14 @@ export interface carreraUniAttributes {
   modalidad?: number;
   arancel?: number;
   semestres?: number;
-  descripcion?: string; // 👈 nuevo campo
   idUniversidad: string;
+  descripcion?: string;
+  videoUrl?: string;
 }
 
 export type carreraUniPk = "idCarrUni";
 export type carreraUniId = carreraUni[carreraUniPk];
-export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres" | "descripcion"; // 👈 agregado
-
+export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres" | "descripcion" | "videoUrl";
 export type carreraUniCreationAttributes = Optional<carreraUniAttributes, carreraUniOptionalAttributes>;
 
 export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAttributes> implements carreraUniAttributes {
@@ -25,8 +25,9 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
   modalidad?: number;
   arancel?: number;
   semestres?: number;
-  descripcion?: string;
   idUniversidad!: string;
+  descripcion?: string;
+  videoUrl?: string;
 
   // carreraUni belongsTo universidad via idUniversidad
   idUniversidad_universidad!: universidad;
@@ -58,10 +59,6 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
         type: DataTypes.INTEGER,
         allowNull: true
       },
-      descripcion: {
-        type: DataTypes.STRING(500), // 👈 aquí defines la columna
-        allowNull: true
-      },
       idUniversidad: {
         type: DataTypes.UUID,
         allowNull: false,
@@ -69,6 +66,14 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
           model: 'universidad',
           key: 'idUniversidad'
         }
+      },
+      descripcion: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      videoUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true
       }
     }, {
       sequelize,
@@ -79,7 +84,9 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
         {
           name: "carrera_PK",
           unique: true,
-          fields: [{ name: "idCarrUni" }]
+          fields: [
+            { name: "idCarrUni" },
+          ]
         },
       ]
     });

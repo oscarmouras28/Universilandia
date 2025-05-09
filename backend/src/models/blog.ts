@@ -4,9 +4,9 @@ import type { Optional } from 'sequelize';
 import type { comentario, comentarioId } from './comentario';
 import type { likeBlog, likeBlogId } from './likeBlog';
 
-
 export interface blogAttributes {
   idBlog: string;
+  titulo: string;
   contenido: string;
 }
 
@@ -17,6 +17,7 @@ export type blogCreationAttributes = Optional<blogAttributes, blogOptionalAttrib
 
 export class blog extends Model<blogAttributes, blogCreationAttributes> implements blogAttributes {
   idBlog!: string;
+  titulo!: string;
   contenido!: string;
 
   // blog hasMany comentario via idBlog
@@ -31,6 +32,7 @@ export class blog extends Model<blogAttributes, blogCreationAttributes> implemen
   hasComentario!: Sequelize.HasManyHasAssociationMixin<comentario, comentarioId>;
   hasComentarios!: Sequelize.HasManyHasAssociationsMixin<comentario, comentarioId>;
   countComentarios!: Sequelize.HasManyCountAssociationsMixin;
+
   // blog hasMany likeBlog via idBlog
   likeBlogs!: likeBlog[];
   getLikeBlogs!: Sequelize.HasManyGetAssociationsMixin<likeBlog>;
@@ -46,33 +48,35 @@ export class blog extends Model<blogAttributes, blogCreationAttributes> implemen
 
   static initModel(sequelize: Sequelize.Sequelize): typeof blog {
     return blog.init({
-    idBlog: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      defaultValue: DataTypes.UUIDV4, // ✅ genera UUID en Node.js,
-      primaryKey: true,
-      validate:{
-        notNull: {msg: 'El idBlog esta llegando nulo',}
-      }
-    },
-    contenido: {
-      type: DataTypes.STRING(255),
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    tableName: 'blog',
-    schema: 'dbo',
-    timestamps: false,
-    indexes: [
-      {
-        name: "blog_PK",
-        unique: true,
-        fields: [
-          { name: "idBlog" },
-        ]
+      idBlog: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
       },
-    ]
-  });
+      titulo: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        defaultValue: 'Título pendiente'
+      },
+      contenido: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+      }
+    }, {
+      sequelize,
+      tableName: 'blog',
+      schema: 'dbo',
+      timestamps: false,
+      indexes: [
+        {
+          name: "blog_PK",
+          unique: true,
+          fields: [
+            { name: "idBlog" },
+          ]
+        },
+      ]
+    });
   }
 }

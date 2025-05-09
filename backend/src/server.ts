@@ -24,7 +24,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Rutas
+//se crea una ruta para usuarios
 app.use('/api/users', userRoutes)
 //se creo una ruta para blogs
 app.use('/api/blogs', blogRoutes)
