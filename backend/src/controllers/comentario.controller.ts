@@ -49,6 +49,7 @@ export const crearComentario = async (req: Request, res: Response): Promise<void
 };
 
 // Obtener comentarios de un blog
+//listar comentarios 
 // Se pueden agregar los tipos de usuarios para retornaar en el frontend.
 export const obtenerComentariosDeBlog = async (req: Request, res: Response): Promise<void> => {
   const { idBlog } = req.params;
@@ -70,28 +71,35 @@ export const obtenerComentariosDeBlog = async (req: Request, res: Response): Pro
           attributes: ["correo", "tipoUsuario"],
         });
 
-        const estudianteData = await estudiante.findOne({
-          where: { idUsuario: comentarioItem.idUsuario },
-          attributes: ["primerNombre", "apellidoPaterno"],
-        });
+        let nombreMostrado = null;
+        if (user) {
+          if (user.tipoUsuario === 'admin') {
+            nombreMostrado = "usuario admin";
+          } else {
+            const estudianteData = await estudiante.findOne({
+              where: { idUsuario: comentarioItem.idUsuario },
+              attributes: ["primerNombre", "apellidoPaterno"],
+            });
+            nombreMostrado = estudianteData 
+              ? `${estudianteData.primerNombre} ${estudianteData.apellidoPaterno}`
+              : null;
+          }
+        }
 
         return {
           ...comentarioItem.toJSON(),
           usuario: user ? user.toJSON() : null,
-          nombreEstudiante: estudianteData
-            ? `${estudianteData.primerNombre} ${estudianteData.apellidoPaterno}`
-            : null,
+          nombreEstudiante: nombreMostrado,
         };
       })
     );
 
     res.status(200).json(comentariosConUsuario);
   } catch (error) {
-    console.error("Error al obtener comentarios:", error instanceof Error ? error.message : error);
-    res.status(500).json({ error: "Error interno al obtener comentarios" });
+    console.error("Error al obtener comentarios:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
 
 
 // Editar comentario
