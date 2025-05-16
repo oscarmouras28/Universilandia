@@ -27,9 +27,6 @@ export default function Navbar() {
       <nav className="space-x-6 text-base">
         <NavLink to="/">Inicio</NavLink>
         <NavLink to="/reseña">Reseñas de carreras</NavLink>
-        <NavLink to="/blog">Blog</NavLink>
-        <NavLink to="/testimonios">Testimonios</NavLink>
-        <NavLink to="/precios">Precios</NavLink>
 
         {isAuthenticated ? (
           <button

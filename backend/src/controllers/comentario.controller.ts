@@ -5,6 +5,7 @@ import { validationResult } from "express-validator";
 import { validate as uuidValidate } from "uuid";
 import { usuario } from "../models/usuario.js";
 import { estudiante } from "../models/estudiante.js";
+import { comentario_auditoria } from "../models/comentarioAuditoria";
 
 //mas adelante agregar validacion de que el usuario siempre tiene que estar activo.
 // Crear comentario
@@ -39,6 +40,7 @@ export const crearComentario = async (req: Request, res: Response): Promise<void
       contenido: contenido.trim(),
       idBlog,
       idUsuario,
+      activo: true,
     });
 
     res.status(201).json(nuevoComentario);
@@ -61,9 +63,13 @@ export const obtenerComentariosDeBlog = async (req: Request, res: Response): Pro
 
   try {
     const comentarios = await comentario.findAll({
-      where: { idBlog },
-      order: [["fechaCreacion", "DESC"]],
+      where: {
+        idBlog,
+        activo: true // 👈 FILTRO CLAVE
+      },
+      order: [['fechaCreacion', 'DESC']]
     });
+    
 
     const comentariosConUsuario = await Promise.all(
       comentarios.map(async (comentarioItem) => {
@@ -157,6 +163,8 @@ export const eliminarComentario = async (req: Request, res: Response): Promise<v
   const { idComentario } = req.params;
   const idUsuario = (req.user as { idUsuario: string })?.idUsuario;
   const tipoUsuario = (req.user as { tipoUsuario: string })?.tipoUsuario;
+  const motivo = req.body.motivo || null;
+
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   if (!idUsuario) {
@@ -169,14 +177,9 @@ export const eliminarComentario = async (req: Request, res: Response): Promise<v
     return;
   }
 
-  if (!comentario || typeof comentario.findByPk !== 'function') {
-    console.error("❌ Modelo 'comentario' no está bien cargado");
-    res.status(500).json({ error: "Error interno de servidor (modelo comentario no cargado)" });
-    return;
-  }
-
   try {
     const Comentario = await comentario.findByPk(idComentario);
+
     if (!Comentario) {
       res.status(404).json({ error: "Comentario no encontrado" });
       return;
@@ -187,9 +190,19 @@ export const eliminarComentario = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    await Comentario.destroy();
+    // Registrar auditoría antes del "borrado"
+    await comentario_auditoria.create({
+      idComentario: Comentario.idComentario,
+      idUsuario,
+      contenidoOriginal: Comentario.contenido,
+      motivo
+    });
 
-    res.status(200).json({ mensaje: "Comentario eliminado correctamente" });
+    // Soft delete
+    Comentario.activo = false;
+    await Comentario.save();
+
+    res.status(200).json({ mensaje: "Comentario eliminado correctamente (soft delete con auditoría)" });
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
     res.status(500).json({ error: "Error interno al eliminar comentario" });

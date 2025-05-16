@@ -17,3 +17,5 @@ router.get('/getUser/:id', getUsuarioById)
 router.post('/login',validarLoginInput, loginUser)
 router.post('/logout', verificarToken, logoutUser); // ← solo usuarios autenticados pueden cerrar sesión
 export default router
+
+
