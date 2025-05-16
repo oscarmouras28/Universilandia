@@ -1,4 +1,4 @@
-import AboutPlaceholder from "../../assets/AboutPlaceholder.png";
+
 
 export default function AboutSection() {
   return (
@@ -20,11 +20,6 @@ export default function AboutSection() {
 
       {/* Imagen + texto */}
       <div className="flex lg:flex-row items-center justify-around gap-20">
-        <img
-          src={AboutPlaceholder}
-          alt="Recurso educativo"
-          className="w-max h-[360px] rounded-2xl object-cover shadow"
-        />
         <p className="max-w-sm text-gray-700 text-base lg:text-right text-center">
           Explora nuestros episodios, accede a recursos exclusivos y encuentra
           el camino que mejor se adapte a ti. <br />
@@ -35,7 +30,7 @@ export default function AboutSection() {
       {/* Botón */}
       <div>
         <a
-          href="#"
+          href="https://universilandia-front-592919962120.southamerica-west1.run.app/reseña"
           className="bg-[#EEE6E0] text-black px-6 py-3 rounded-lg font-semibold shadow"
         >
           Más información

@@ -45,6 +45,8 @@ import { usuario as _usuario } from "./usuario.js";
 import type { usuarioAttributes, usuarioCreationAttributes } from "./usuario.js";
 import { tokenInvalidado as _tokenInvalidado } from './tokenInvalidado.js';
 import type { tokenInvalidadoAttributes, tokenInvalidadoCreationAttributes } from './tokenInvalidado.js';
+import { comentario_auditoria as _comentario_auditoria } from "./comentarioAuditoria.js";
+import type { comentario_auditoriaAttributes, comentario_auditoriaCreationAttributes } from "./comentarioAuditoria.js";
 
 export {
   _blog as blog,
@@ -70,6 +72,7 @@ export {
   _usuario as usuario,
   _transaccion as transaccion,
   _tokenInvalidado as tokenInvalidado,
+  _comentario_auditoria as comentario_auditoria,
 };
 
 export type {
@@ -119,6 +122,9 @@ export type {
   transaccionCreationAttributes,
   tokenInvalidadoAttributes,
   tokenInvalidadoCreationAttributes,
+  comentario_auditoriaAttributes,
+  comentario_auditoriaCreationAttributes,
+  
 };
 
 export function initModels(sequelize: Sequelize) {
@@ -145,6 +151,7 @@ export function initModels(sequelize: Sequelize) {
   const usuario = _usuario.initModel(sequelize);
   const transaccion = _transaccion.initModel(sequelize);
   const tokenInvalidado = _tokenInvalidado.initModel(sequelize);
+  const comentario_auditoria = _comentario_auditoria.initModel(sequelize);
 
   comentario.belongsTo(blog, { as: "idBlog_blog", foreignKey: "idBlog"});
   blog.hasMany(comentario, { as: "comentarios", foreignKey: "idBlog"});
@@ -192,6 +199,11 @@ export function initModels(sequelize: Sequelize) {
   usuario.hasMany(suscripcion, { as: "suscripcions", foreignKey: "idUsuario"});
   transaccion.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario" });
   usuario.hasMany(transaccion, { as: "transacciones", foreignKey: "idUsuario" });
+  comentario_auditoria.belongsTo(comentario, { as: "idComentario_comentario", foreignKey: "idComentario" });
+  comentario.hasMany(comentario_auditoria, { as: "auditorias", foreignKey: "idComentario" });
+  comentario_auditoria.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario" }); 
+  usuario.hasMany(comentario_auditoria, { as: "comentariosAuditados", foreignKey: "idUsuario" });
+
   
 
 
@@ -219,5 +231,6 @@ export function initModels(sequelize: Sequelize) {
     usuario: usuario,
     transaccion: transaccion,
     tokenInvalidado: tokenInvalidado,
+    comentario_auditoria: comentario_auditoria,
   };
 }
