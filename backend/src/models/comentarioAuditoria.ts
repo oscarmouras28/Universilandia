@@ -43,7 +43,7 @@ export class comentario_auditoria extends Model<comentario_auditoriaAttributes, 
       idAuditoria: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: Sequelize.Sequelize.fn('newsequentialid'),
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
       idComentario: {
@@ -68,8 +68,8 @@ export class comentario_auditoria extends Model<comentario_auditoriaAttributes, 
       },
       fechaEliminacion: {
         type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: Sequelize.Sequelize.fn('getdate')
+        allowNull: false,
+        defaultValue: Sequelize.Sequelize.fn('sysdatetime')
       },
       motivo: {
         type: DataTypes.STRING(255),

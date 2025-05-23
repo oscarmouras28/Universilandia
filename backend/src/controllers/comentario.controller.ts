@@ -5,8 +5,8 @@ import { validationResult } from "express-validator";
 import { validate as uuidValidate } from "uuid";
 import { usuario } from "../models/usuario.js";
 import { estudiante } from "../models/estudiante.js";
-import { comentario_auditoria } from "../models/comentarioAuditoria";
-
+import { comentario_auditoria } from "../models/comentarioAuditoria.js";
+import { Sequelize } from 'sequelize';
 //mas adelante agregar validacion de que el usuario siempre tiene que estar activo.
 // Crear comentario
 export const crearComentario = async (req: Request, res: Response): Promise<void> => {
@@ -51,6 +51,7 @@ export const crearComentario = async (req: Request, res: Response): Promise<void
 };
 
 // Obtener comentarios de un blog
+//listar comentarios 
 // Se pueden agregar los tipos de usuarios para retornaar en el frontend.
 export const obtenerComentariosDeBlog = async (req: Request, res: Response): Promise<void> => {
   const { idBlog } = req.params;
@@ -68,7 +69,7 @@ export const obtenerComentariosDeBlog = async (req: Request, res: Response): Pro
       },
       order: [['fechaCreacion', 'DESC']]
     });
-    
+
 
     const comentariosConUsuario = await Promise.all(
       comentarios.map(async (comentarioItem) => {
@@ -76,28 +77,35 @@ export const obtenerComentariosDeBlog = async (req: Request, res: Response): Pro
           attributes: ["correo", "tipoUsuario"],
         });
 
-        const estudianteData = await estudiante.findOne({
-          where: { idUsuario: comentarioItem.idUsuario },
-          attributes: ["primerNombre", "apellidoPaterno"],
-        });
+        let nombreMostrado = null;
+        if (user) {
+          if (user.tipoUsuario === 'admin') {
+            nombreMostrado = "usuario admin";
+          } else {
+            const estudianteData = await estudiante.findOne({
+              where: { idUsuario: comentarioItem.idUsuario },
+              attributes: ["primerNombre", "apellidoPaterno"],
+            });
+            nombreMostrado = estudianteData
+              ? `${estudianteData.primerNombre} ${estudianteData.apellidoPaterno}`
+              : null;
+          }
+        }
 
         return {
           ...comentarioItem.toJSON(),
           usuario: user ? user.toJSON() : null,
-          nombreEstudiante: estudianteData
-            ? `${estudianteData.primerNombre} ${estudianteData.apellidoPaterno}`
-            : null,
+          nombreEstudiante: nombreMostrado,
         };
       })
     );
 
     res.status(200).json(comentariosConUsuario);
   } catch (error) {
-    console.error("Error al obtener comentarios:", error instanceof Error ? error.message : error);
-    res.status(500).json({ error: "Error interno al obtener comentarios" });
+    console.error("Error al obtener comentarios:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
 
 
 // Editar comentario
@@ -122,7 +130,7 @@ export const actualizarComentario = async (req: Request, res: Response): Promise
     res.status(400).json({ error: "Contenido muy corto" });
     return;
   }
-//validacion nueva del modelo comentario. 
+  //validacion nueva del modelo comentario. 
   if (!comentario || typeof comentario.findByPk !== 'function') {
     console.error("❌ Modelo 'comentario' no está bien cargado");
     res.status(500).json({ error: "Error interno de servidor (modelo comentario no cargado)" });
@@ -176,7 +184,8 @@ export const eliminarComentario = async (req: Request, res: Response): Promise<v
       res.status(404).json({ error: "Comentario no encontrado" });
       return;
     }
-
+//Si el id del usuario que intenta eliminar el comentario no es el mismo que el del JWT no puede eliminar. 
+//Si el usuario no es admin entonces no puede eliminar el comentario.
     if (Comentario.idUsuario !== idUsuario && tipoUsuario !== "admin") {
       res.status(403).json({ error: "No autorizado para eliminar este comentario" });
       return;
@@ -194,9 +203,9 @@ export const eliminarComentario = async (req: Request, res: Response): Promise<v
     Comentario.activo = false;
     await Comentario.save();
 
-    res.status(200).json({ mensaje: "Comentario eliminado correctamente (soft delete con auditoría)" });
+    res.status(200).json({ mensaje: "Comentario eliminado correctamente Soft Delete" });
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
     res.status(500).json({ error: "Error interno al eliminar comentario" });
   }
-};
+}; 
