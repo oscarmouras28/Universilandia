@@ -11,16 +11,16 @@ const SECRET_KEY = process.env.SECRET_KEY || 'supersecreto';
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { correo, password } = req.body;
 
-  if (!correo || !password) {
-    res.status(400).json({ error: 'Correo y contraseña son requeridos' });
-    return;
-  }
-
   try {
     const user = await usuario.findOne({ where: { correo } });
 
     if (!user) {
-      res.status(401).json({ error: 'Usuario no encontrado'  });
+      res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    if (!user.activo) {
+      res.status(403).json({ error: 'Usuario inactivo. Contacte a un administrador.' });
       return;
     }
 
@@ -50,7 +50,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error('Error en login:', err);
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    console.error('❌ Error en login:', err);
+    res.status(500).json({ error: 'Error interno al iniciar sesión' });
   }
 };
