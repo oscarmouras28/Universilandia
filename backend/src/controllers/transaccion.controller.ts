@@ -85,6 +85,6 @@ export const confirmarTransaccion = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error('❌ Error al confirmar y registrar transacción:', error);
-    res.status(500).json({ error: 'Error interno al procesar el pago', detalle: error.message });
+    res.status(500).json({ error: 'Error interno al procesar el pago', 'detalle': error.message });
   }
 };

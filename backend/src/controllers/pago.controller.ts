@@ -3,6 +3,7 @@ import mp from '../config/mercadoPago.js';
 import { Preference } from 'mercadopago/dist/clients/preference/index.js';
 import { suscripcion } from '../models/suscripcion.js';
 import { Op } from 'sequelize';
+import { Result } from 'express-validator';
 
 export const crearPreferencia = async (req: Request, res: Response): Promise<void> => {
   const idUsuario = (req.user as { idUsuario: string })?.idUsuario;
@@ -55,7 +56,7 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
           },
         ],
         back_urls: {
-          success: 'https://universilandia.cl/success',
+          success: 'https://universilandia-backend-592919962120.southamerica-west1.run.app/api/pagos/success',
           failure: 'https://universilandia.cl/failure',
           pending: 'https://universilandia.cl/pending',
         },
@@ -63,9 +64,14 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
         external_reference: idUsuario,
       },
     });
+    const result= preference;
+    res.status(200).json(result);
+    const sandboxLink = preference.sandbox_init_point || preference.init_point;
+    console.log('✅ Preferencia creada (init_point):', sandboxLink);
+    res.status(200).json({ init_point: sandboxLink });
 
-    console.log('✅ Preferencia creada:', preference);
-    res.status(200).json({ init_point: preference.init_point });
+    // console.log('✅ Preferencia creada:', preference);
+    // res.status(200).json({ init_point: preference.init_point });
 
   } catch (error) {
     console.error('❌ Error al crear preferencia de pago:', error);
