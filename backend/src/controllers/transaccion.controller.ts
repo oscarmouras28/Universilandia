@@ -2,8 +2,8 @@ import type { Request, Response } from 'express';
 import mp from '../config/mercadoPago.js';
 import { transaccion } from '../models/transaccion.js';
 import { suscripcion } from '../models/suscripcion.js';
-import { Op } from 'sequelize';
 import { Payment } from 'mercadopago/dist/clients/payment/index.js';
+import { Op } from 'sequelize';
 
 export const confirmarTransaccion = async (req: Request, res: Response) => {
   const paymentId = req.body.payment_id;
@@ -15,7 +15,9 @@ export const confirmarTransaccion = async (req: Request, res: Response) => {
   }
 
   try {
-    // Evitar duplicación de transacción
+    const paymentClient = new Payment(mp);
+
+    // Verificar si ya existe una transacción registrada
     const existente = await transaccion.findOne({
       where: { referenciaExterna: paymentId.toString() },
     });
@@ -27,64 +29,55 @@ export const confirmarTransaccion = async (req: Request, res: Response) => {
       });
       return;
     }
-    const paymentClient = new Payment(mp);
+
+    // Obtener el estado del pago desde MercadoPago
     const pago = await paymentClient.get({ id: paymentId });
-    
+    const estadoPago = pago.status;
+    const montoPago = pago.transaction_amount;
+    const metodoPago = pago.payment_method_id;
 
-    if (pago.status !== 'approved') {
-      res.status(200).json({ mensaje: `El pago no está aprobado: ${pago.status}` });
-      return;
-    }
+    console.log(`🔍 Estado del pago: ${estadoPago}`);
 
-    // Verificar si ya tiene una suscripción activa
-    const hoy = new Date();
-    const tieneActiva = await suscripcion.findOne({
-      where: {
+    let nuevaSuscripcionId: string | null = null;
+
+    // Si está aprobado, crear suscripción
+    if (estadoPago === 'approved') {
+      const hoy = new Date();
+      const fechaFin = new Date();
+      fechaFin.setDate(hoy.getDate() + 30); // 30 días de suscripción
+
+      const nuevaSuscripcion = await suscripcion.create({
         idUsuario,
+        fechaInicio: hoy,
+        fechaTermino: fechaFin,
         estado: true,
-        fechaTermino: { [Op.gt]: hoy },
-      },
-    });
-
-    if (tieneActiva) {
-      res.status(409).json({
-        mensaje: 'Ya tienes una suscripción activa. No se generó una nueva.',
-        suscripcion: tieneActiva,
       });
-      return;
+
+      nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
+
+      console.log(`✅ Suscripción creada: ${nuevaSuscripcionId}`);
     }
 
-    // Crear nueva suscripción (30 días)
-    const fechaInicio = hoy;
-    const fechaFin = new Date();
-    fechaFin.setDate(fechaInicio.getDate() + 30);
-
-    const nuevaSuscripcion = await suscripcion.create({
-      idUsuario,
-      fechaInicio,
-      fechaTermino: fechaFin,
-      estado: true,
-    });
-
-    // Registrar transacción
+    // Registrar la transacción (independientemente del estado)
     const nuevaTransaccion = await transaccion.create({
       idUsuario,
-      idSuscripcion: nuevaSuscripcion.idSuscripcion,
-      monto: pago.transaction_amount?? 0,
-      metodoPago: pago.payment_method_id??'desconocido',
-      estado: pago.status,
-      referenciaExterna: pago.id?.toString()??'sin-id',
-      fecha: new Date(pago.date_created?? Date.now()),
+      idSuscripcion: nuevaSuscripcionId ?? undefined,
+      monto: montoPago ?? 0,
+      metodoPago: metodoPago?? '',
+      estado: estadoPago ?? '',
+      referenciaExterna: paymentId.toString(),
+      fecha: new Date(),
     });
 
     res.status(201).json({
-      mensaje: 'Pago confirmado, suscripción activa y transacción registrada',
-      suscripcion: nuevaSuscripcion,
+      mensaje: 'Transacción registrada correctamente',
+      estado: estadoPago,
+      suscripcion: nuevaSuscripcionId ? 'Activa' : 'No creada (pago no aprobado)',
       transaccion: nuevaTransaccion,
     });
 
   } catch (error: any) {
     console.error('❌ Error al confirmar y registrar transacción:', error);
-    res.status(500).json({ error: 'Error interno al procesar el pago', 'detalle': error.message });
+    res.status(500).json({ error: 'Error interno al procesar el pago', detalle: error.message });
   }
 };
