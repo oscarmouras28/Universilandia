@@ -6,6 +6,6 @@ import { verificarToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/confirmar',verificarToken, confirmarTransaccion);
+router.post('/confirmar', verificarToken, confirmarTransaccion);
 
 export default router;
