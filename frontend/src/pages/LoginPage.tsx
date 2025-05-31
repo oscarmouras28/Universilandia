@@ -23,16 +23,16 @@ export default function LoginPage() {
   return (
     <PublicLayout>
       <main className="min-h-screen flex items-start justify-center overflow-y-auto py-8">
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-[60px] px-4 lg:px-6">
+        <div className="flex flex-col xl:flex-row items-center justify-center gap-[60px] px-4 xl:px-6">
           {/* Columna izquierda formulario */}
-          <div className="w-full max-w-[737px] flex flex-col justify-center">
+          <div className="w-full max-w-[350px] sm:max-w-[740px] flex flex-col justify-center">
             {/* Bloque Titular*/}
             <div className="flex flex-col items-center mb-6">
-              <div className="bg-[#EEE6E0] w-[297px] h-[121px] rounded-lg flex justify-center items-center mb-4">
-                <h1 className="font-bold text-[64px]">¡Hola!</h1>
+              <div className="bg-[#EEE6E0] w-[300px] h-[120px] rounded-lg flex justify-center items-center mb-4">
+                <h1 className="font-bold text-[50px]">¡Hola!</h1>
               </div>
 
-              <h2 className="font-semibold text-5xl">Entra en tu cuenta</h2>
+              <h2 className="font-semibold text-3xl">Entra en tu cuenta</h2>
             </div>
 
             {/* Formulario */}
@@ -67,7 +67,7 @@ export default function LoginPage() {
               <div className="flex justify-end">
                 <a
                   href="#"
-                  className="mb-3 mt-[-12px] font-semibold text-[19px]"
+                  className="mb-3 mt-[-12px] font-semibold text-[18px] hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -77,21 +77,22 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-56 h-16 bg-black text-white rounded-full font-semibold text-[25px]"
+                  className="max-w-44 w-full p-3 bg-black text-white rounded-full font-semibold text-[20px]"
                 >
                   Ingresar
                 </button>
               </div>
             </form>
 
-            {/* Bloque Sign In (Google, Facebook, Apple)*/}
-            <div className="flex items-center gap-4 my-8 w-[580px] mx-auto">
+            {/* Separador */}
+            <div className="flex items-center gap-4 my-8 w-full mx-auto">
               <hr className="flex-1 border-t border-black" />
               <span className="text-xl font-semibold">o</span>
               <hr className="flex-1 border-t border-black" />
             </div>
 
-            <div className="flex flex-col gap-4 w-[580px] mx-auto">
+            {/* Bloque Sign In (Google, Facebook, Apple)*/}
+            <div className="w-full sm:w-[580px] flex flex-col gap-4 mx-auto">
               <SocialButton
                 icon={
                   <svg
@@ -172,7 +173,7 @@ export default function LoginPage() {
           <img
             src={Gatito}
             alt="Gatito con un computador"
-            className="w-[300px] max-w-full max-h-[40vh] object-contain lg:w-[558px] lg:max-h-[85vh]"
+            className="w-[300px] max-w-full max-h-[40vh] object-contain xl:w-[558px] xl:max-h-[85vh]"
           />
         </div>
       </main>
