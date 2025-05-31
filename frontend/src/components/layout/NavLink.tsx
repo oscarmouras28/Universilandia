@@ -5,6 +5,7 @@ interface NavLinkProps {
   to: string;
   children: ReactNode;
   variant?: "default" | "button";
+  onClick?: () => void;
 }
 
 export default function NavLink({

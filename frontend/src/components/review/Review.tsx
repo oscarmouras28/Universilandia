@@ -14,7 +14,7 @@ export default function Review() {
       />
 
       {/* Barra inferior decorativa */}
-      <div className="w-[520px] h-16 bg-[#1A1A1A] rounded-full"></div>
+      <div className="w-4/5 max-w-[520px] h-16 bg-[#1A1A1A] rounded-full"></div>
     </section>
   );
 }

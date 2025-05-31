@@ -14,7 +14,7 @@ export default function SocialButton({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-4 border border-black rounded-full px-6 py-3 w-full"
+      className="flex items-center gap-4 border border-black rounded-full px-6 py-3"
     >
       <span className="w-6 h-6">{icon}</span>
       <span className="text-lg font-semibold">{label}</span>

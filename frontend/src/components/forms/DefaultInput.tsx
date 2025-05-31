@@ -10,7 +10,7 @@ const DefaultInput = forwardRef<HTMLInputElement, DefaultInput>(
 
     return (
       <div className="flex flex-col gap-1">
-        <label htmlFor={inputId} className="font-semibold text-[25px]">
+        <label htmlFor={inputId} className="font-semibold text-[18px]">
           {label}
         </label>
         <input
