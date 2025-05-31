@@ -65,8 +65,6 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
         external_reference: idUsuario,
       },
     });
-    const result = preference;
-    res.status(200).json(result);
     const sandboxLink = preference.sandbox_init_point || preference.init_point;
     console.log('✅ Preferencia creada (init_point):', sandboxLink);
     res.status(200).json({ init_point: sandboxLink });
@@ -80,33 +78,54 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
   }
 };
 
+//AQUI COMIENZA EL METODO PARA PROCESAR EL WEBHOOK DE MERCADOPAGO. 
+// Este método recibe notificaciones de MercadoPago cuando se realizan pagos
 
-export const webhookNotificacion = async (req: Request, res: Response) => {
-  const body = req.body;
+export const webhookNotificacion = async (req: Request, res: Response): Promise<void> => {
+  let body;
+  try {
+    const rawBody = req.body;
+    console.log('📥 Webhook RAW body:', rawBody.toString());
+
+    body = JSON.parse(rawBody.toString());
+  } catch (err) {
+    console.error('❌ Error al parsear el body:', err);
+    res.status(400).send('Invalid body format');
+    return;
+  }
+
+  console.log('🔥 Webhook body Parseado:', JSON.stringify(body, null, 2));
 
   try {
-    console.log('📥 Webhook recibido:', JSON.stringify(body, null, 2));
-
     if (body.type !== 'payment') {
+      console.log('⚠ Evento ignorado (no es de tipo payment)');
       res.status(200).send('Evento ignorado (no es de tipo payment)');
       return;
     }
 
-    const paymentId = body.data.id;
+    const paymentId = body.data?.id;
+
+    if (!paymentId) {
+      console.log('❌ No se recibió paymentId en el body');
+      res.status(400).send('Falta paymentId');
+      return;
+    }
+
     const paymentClient = new Payment(mp);
 
+    console.log(`🔍 Consultando detalles del pago en MercadoPago, paymentId: ${paymentId}`);
+
     const pago = await paymentClient.get({ id: paymentId });
+
+    console.log('✅ Datos del pago obtenidos:', JSON.stringify(pago, null, 2));
 
     const estadoPago = pago.status;
     const montoPago = pago.transaction_amount;
     const metodoPago = pago.payment_method_id;
     const idUsuario = pago.external_reference;
 
-    console.log(`🔍 Estado del pago (webhook): ${estadoPago}`);
-
-    // Validar que tengamos idUsuario antes de continuar
     if (!idUsuario) {
-      console.error('❌ No se recibió external_reference (idUsuario) en el pago');
+      console.log('❌ No se recibió external_reference (idUsuario) en el pago');
       res.status(400).send('No se pudo procesar: falta idUsuario en external_reference');
       return;
     }
@@ -122,9 +141,11 @@ export const webhookNotificacion = async (req: Request, res: Response) => {
       return;
     }
 
-    let nuevaSuscripcionId: string | undefined = undefined;
+    let nuevaSuscripcionId: string | undefined;
 
     if (estadoPago === 'approved') {
+      console.log('✅ Estado aprobado: creando suscripción');
+
       const hoy = new Date();
       const fechaFin = new Date();
       fechaFin.setDate(hoy.getDate() + 30);
@@ -138,10 +159,14 @@ export const webhookNotificacion = async (req: Request, res: Response) => {
 
       nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
 
-      console.log(`✅ Suscripción creada desde webhook: ${nuevaSuscripcionId}`);
+      console.log(`✅ Suscripción creada con id: ${nuevaSuscripcionId}`);
+    } else {
+      console.log(`⚠ Estado del pago no aprobado (${estadoPago}), no se crea suscripción`);
     }
 
-    await transaccion.create({
+    console.log('💾 Guardando transacción en base de datos');
+
+    const nuevaTransaccion = await transaccion.create({
       idUsuario,
       idSuscripcion: nuevaSuscripcionId,
       monto: montoPago ?? 0,
@@ -150,6 +175,8 @@ export const webhookNotificacion = async (req: Request, res: Response) => {
       referenciaExterna: paymentId.toString(),
       fecha: new Date(),
     });
+
+    console.log('✅ Transacción registrada correctamente:', nuevaTransaccion);
 
     res.status(201).send('Webhook procesado correctamente');
   } catch (error: any) {

@@ -14,7 +14,7 @@ import transaccionRoutes from './routes/transaccionRoutes.js';
 import carreraInstitutoRoutes from './routes/carreraInstitutoRoutes.js';
 import carreraUniversidadRoutes from './routes/carreraUniversidadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js'; // Importa las rutas de admin
-
+import { webhookNotificacion } from './controllers/pago.controller.js';
 
 dotenv.config()
 
@@ -22,7 +22,11 @@ dotenv.config()
 
 const app = express()
 app.use(cors())
+
+app.post('/api/pagos/webhook', express.raw({ type: 'application/json' }), webhookNotificacion);
+
 app.use(express.json())
+
 
 //se crea una ruta para usuarios
 app.use('/api/users', userRoutes)
