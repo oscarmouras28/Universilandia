@@ -1,66 +1,83 @@
 import type { Request, Response } from 'express';
+import mp from '../config/mercadoPago.js';
 import { transaccion } from '../models/transaccion.js';
+import { suscripcion } from '../models/suscripcion.js';
+import { Payment } from 'mercadopago/dist/clients/payment/index.js';
+import { Op } from 'sequelize';
 
-// Crear nueva transacción
-export const createTransaccion = async (req: Request, res: Response) => {
+export const confirmarTransaccion = async (req: Request, res: Response) => {
+  const paymentId = req.body.payment_id;
+  const idUsuario = (req.user as { idUsuario: string })?.idUsuario;
+
+  if (!paymentId || !idUsuario) {
+    res.status(400).json({ error: 'Falta el payment_id o el usuario no está autenticado' });
+    return;
+  }
+
   try {
-    const nuevaTransaccion = await transaccion.create(req.body);
-    res.status(201).json(nuevaTransaccion);
+    const paymentClient = new Payment(mp);
+
+    // Verificar si ya existe una transacción registrada
+    const existente = await transaccion.findOne({
+      where: { referenciaExterna: paymentId.toString() },
+    });
+
+    if (existente) {
+      res.status(409).json({
+        mensaje: 'La transacción ya está registrada',
+        transaccion: existente,
+      });
+      return;
+    }
+
+    // Obtener el estado del pago desde MercadoPago
+    const pago = await paymentClient.get({ id: paymentId });
+    const estadoPago = pago.status;
+    const montoPago = pago.transaction_amount;
+    const metodoPago = pago.payment_method_id;
+
+    console.log(`🔍 Estado del pago: ${estadoPago}`);
+
+    let nuevaSuscripcionId: string | null = null;
+
+    // Si está aprobado, crear suscripción
+    if (estadoPago === 'approved') {
+      const hoy = new Date();
+      const fechaFin = new Date();
+      fechaFin.setDate(hoy.getDate() + 30); // 30 días de suscripción
+
+      const nuevaSuscripcion = await suscripcion.create({
+        idUsuario,
+        fechaInicio: hoy,
+        fechaTermino: fechaFin,
+        estado: true,
+      });
+
+      nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
+
+      console.log(`✅ Suscripción creada: ${nuevaSuscripcionId}`);
+    }
+
+    // Registrar la transacción (independientemente del estado)
+    const nuevaTransaccion = await transaccion.create({
+      idUsuario,
+      idSuscripcion: nuevaSuscripcionId ?? undefined,
+      monto: montoPago ?? 0,
+      metodoPago: metodoPago?? '',
+      estado: estadoPago ?? '',
+      referenciaExterna: paymentId.toString(),
+      fecha: new Date(),
+    });
+
+    res.status(201).json({
+      mensaje: 'Transacción registrada correctamente',
+      estado: estadoPago,
+      suscripcion: nuevaSuscripcionId ? 'Activa' : 'No creada (pago no aprobado)',
+      transaccion: nuevaTransaccion,
+    });
+
   } catch (error: any) {
-    res.status(500).json({ error: 'Error al crear la transacción', detalle: error.message });
-  }
-};
-
-// Listar todas las transacciones
-export const getTransacciones = async (_req: Request, res: Response) => {
-  try {
-    const transacciones = await transaccion.findAll();
-    res.status(200).json(transacciones);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener transacciones' });
-  }
-};
-
-// Obtener una transacción por ID
-export const getTransaccionById = async (req: Request, res: Response) => {
-  try {
-    const transaccionEncontrada = await transaccion.findByPk(req.params.id);
-    if (transaccionEncontrada) {
-      res.status(200).json(transaccionEncontrada);
-    } else {
-      res.status(404).json({ error: 'Transacción no encontrada' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener transacción' });
-  }
-};
-
-// Actualizar transacción
-export const updateTransaccion = async (req: Request, res: Response) => {
-  try {
-    const transaccionEncontrada = await transaccion.findByPk(req.params.id);
-    if (transaccionEncontrada) {
-      await transaccionEncontrada.update(req.body);
-      res.status(200).json(transaccionEncontrada);
-    } else {
-      res.status(404).json({ error: 'Transacción no encontrada' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar transacción' });
-  }
-};
-
-// Eliminar transacción
-export const deleteTransaccion = async (req: Request, res: Response) => {
-  try {
-    const transaccionEncontrada = await transaccion.findByPk(req.params.id);
-    if (transaccionEncontrada) {
-      await transaccionEncontrada.destroy();
-      res.status(204).send();
-    } else {
-      res.status(404).json({ error: 'Transacción no encontrada' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar transacción' });
+    console.error('❌ Error al confirmar y registrar transacción:', error);
+    res.status(500).json({ error: 'Error interno al procesar el pago', detalle: error.message });
   }
 };

@@ -2,7 +2,7 @@ import { useCarreras } from "../../hooks/useCarreras";
 import { useNavigate } from "react-router-dom";
 
 export default function CarreraList() {
-  const { carreras, loading, error } = useCarreras();
+  const { carreras, /*loading, */ error } = useCarreras();
   const navigate = useNavigate();
 
   return (

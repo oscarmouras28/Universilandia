@@ -1,18 +1,11 @@
 import express from 'express';
 import {
-  createTransaccion,
-  getTransacciones,
-  getTransaccionById,
-  updateTransaccion,
-  deleteTransaccion
+  confirmarTransaccion
 } from '../controllers/transaccion.controller.js';
+import { verificarToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/crear', createTransaccion);
-router.get('/listar', getTransacciones);
-router.get('/obtener/:id', getTransaccionById);
-router.put('/actualizar/:id', updateTransaccion);
-router.delete('/eliminar/:id', deleteTransaccion);
+router.post('/confirmar', verificarToken, confirmarTransaccion);
 
 export default router;

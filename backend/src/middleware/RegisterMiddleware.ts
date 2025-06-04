@@ -25,7 +25,7 @@ export const validarRegisterInput = (req: Request, res: Response, next: NextFunc
   }
 
   // Validar tipoUsuario permitido
-  const tiposPermitidos = ['admin'];
+  const tiposPermitidos = ['admin','estudiante','orientador'];
   if (!tiposPermitidos.includes(tipoUsuario)) {
     res.status(400).json({ error: `Tipo de usuario inválido. Debe ser uno de: ${tiposPermitidos.join(', ')}` });
     return;
