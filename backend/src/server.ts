@@ -14,7 +14,7 @@ import transaccionRoutes from './routes/transaccionRoutes.js';
 import carreraInstitutoRoutes from './routes/carreraInstitutoRoutes.js';
 import carreraUniversidadRoutes from './routes/carreraUniversidadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js'; // Importa las rutas de admin
-
+import multimediaRoutes from './routes/multimediaRoutes.js';
 
 dotenv.config()
 
@@ -45,7 +45,10 @@ app.use('/api/carrerasInstituto', carreraInstitutoRoutes)
 //se crea una ruta para carreras universitarias
 app.use('/api/carrerasUniversitarias', carreraUniversidadRoutes)
 //se crea una ruta para admin
-app.use('/api/admin', adminRoutes); // ✅ Usa las rutas de admin
+app.use('/api/admin', adminRoutes); 
+// Usa las rutas de admin
+app.use('/api/multimedia', multimediaRoutes);
+// usa las rutas multimedia
 
 
 const PORT = process.env.PORT || 8080

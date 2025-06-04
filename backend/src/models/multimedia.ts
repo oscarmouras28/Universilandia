@@ -5,6 +5,7 @@ import type { Optional } from 'sequelize';
 export interface multimediaAttributes {
   idMultimedia: string;
   url: string;
+  descripcion?: string;
 }
 
 export type multimediaPk = "idMultimedia";
@@ -15,6 +16,7 @@ export type multimediaCreationAttributes = Optional<multimediaAttributes, multim
 export class multimedia extends Model<multimediaAttributes, multimediaCreationAttributes> implements multimediaAttributes {
   idMultimedia!: string;
   url!: string;
+  descripcion!: string;
 
 
   static initModel(sequelize: Sequelize.Sequelize): typeof multimedia {
@@ -28,7 +30,11 @@ export class multimedia extends Model<multimediaAttributes, multimediaCreationAt
     url: {
       type: DataTypes.STRING(255),
       allowNull: false
-    }
+    },
+    descripcion: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   }, {
     sequelize,
     tableName: 'multimedia',
