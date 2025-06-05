@@ -2,6 +2,7 @@ import * as Sequelize from 'sequelize';
 import { DataTypes, Model } from 'sequelize';
 import type { Optional } from 'sequelize';
 import type { universidad, universidadId } from './universidad';
+import type { multimedia, multimediaId } from './multimedia'; // ⬅ importar multimedia
 
 export interface carreraUniAttributes {
   idCarrUni: string;
@@ -11,12 +12,12 @@ export interface carreraUniAttributes {
   semestres?: number;
   idUniversidad: string;
   descripcion?: string;
-  videoUrl?: string;
+  idMultimedia?: string; // ⬅ nuevo campo
 }
 
 export type carreraUniPk = "idCarrUni";
 export type carreraUniId = carreraUni[carreraUniPk];
-export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres" | "descripcion" | "videoUrl";
+export type carreraUniOptionalAttributes = "idCarrUni" | "modalidad" | "arancel" | "semestres" | "descripcion" | "idMultimedia";
 export type carreraUniCreationAttributes = Optional<carreraUniAttributes, carreraUniOptionalAttributes>;
 
 export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAttributes> implements carreraUniAttributes {
@@ -27,13 +28,19 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
   semestres?: number;
   idUniversidad!: string;
   descripcion?: string;
-  videoUrl?: string;
+  idMultimedia?: string;
 
-  // carreraUni belongsTo universidad via idUniversidad
+  // Relación con universidad
   idUniversidad_universidad!: universidad;
   getIdUniversidad_universidad!: Sequelize.BelongsToGetAssociationMixin<universidad>;
   setIdUniversidad_universidad!: Sequelize.BelongsToSetAssociationMixin<universidad, universidadId>;
   createIdUniversidad_universidad!: Sequelize.BelongsToCreateAssociationMixin<universidad>;
+
+  // Relación con multimedia
+  multimedia?: multimedia;
+  getMultimedia!: Sequelize.BelongsToGetAssociationMixin<multimedia>;
+  setMultimedia!: Sequelize.BelongsToSetAssociationMixin<multimedia, multimediaId>;
+  createMultimedia!: Sequelize.BelongsToCreateAssociationMixin<multimedia>;
 
   static initModel(sequelize: Sequelize.Sequelize): typeof carreraUni {
     return carreraUni.init({
@@ -71,9 +78,13 @@ export class carreraUni extends Model<carreraUniAttributes, carreraUniCreationAt
         type: DataTypes.TEXT,
         allowNull: true
       },
-      videoUrl: {
-        type: DataTypes.STRING(500),
-        allowNull: true
+      idMultimedia: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'multimedia',
+          key: 'IDMultimedia'
+        }
       }
     }, {
       sequelize,

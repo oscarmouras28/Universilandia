@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const storage = new Storage({
-  keyFilename: path.join(__dirname, '../config/google-storage-key.json'),
+  keyFilename: path.join(__dirname, '../config/stone-lodge-454213-k0-148fcea09b08.json'),
 });
 
 const bucketName = 'universilandia-vodcasts';

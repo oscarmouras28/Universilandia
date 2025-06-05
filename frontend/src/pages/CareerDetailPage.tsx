@@ -11,7 +11,7 @@ export default function CareerDetailPage() {
   if (!carrera)
     return <p className="text-center mt-10">Carrera no encontrada.</p>;
 
-  const videoUrl = "https://www.youtube.com/watch?v=25lp_CbayJo&t=2s"; // temporal
+  const videoUrl = carrera?.urlVideo; // temporal
 
   return (
     <PublicLayout>
@@ -19,6 +19,7 @@ export default function CareerDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           {/* Video lado izquierdo */}
           <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg">
+            {videoUrl ? (
             <iframe
               className="w-full h-full"
               src={videoUrl}
@@ -27,6 +28,11 @@ export default function CareerDetailPage() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
+            ) : (
+              <p className="text-center text-sm text-gray-500 mt-4">
+                Video no disponible para esta carrera.
+              </p>
+            )}
           </div>
 
           {/* Info lado derecho */}
