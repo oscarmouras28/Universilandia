@@ -18,22 +18,24 @@ export default function CareerDetailPage() {
       <section className="px-6 lg:px-20 py-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           {/* Video lado izquierdo */}
-          <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg">
-            {videoUrl ? (
-            <iframe
-              className="w-full h-full"
-              src={videoUrl}
-              title="Podcast de la carrera"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-            ) : (
-              <p className="text-center text-sm text-gray-500 mt-4">
-                Video no disponible para esta carrera.
-              </p>
-            )}
-          </div>
+          <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg bg-black">
+  {videoUrl ? (
+    <video
+      className="w-full h-full"
+      controls
+      preload="auto"
+      poster="/poster-default.jpg" // opcional
+    >
+      <source src={videoUrl} type="video/mp4" />
+      Tu navegador no soporta la reproducción de video.
+    </video>
+  ) : (
+    <p className="text-center text-sm text-gray-500 mt-4">
+      Video no disponible para esta carrera.
+    </p>
+  )}
+</div>
+
 
           {/* Info lado derecho */}
           <div className="space-y-6">
