@@ -6,6 +6,7 @@ import { validate as uuidValidate } from "uuid";
 import { usuario } from "../models/usuario.js";
 import { estudiante } from "../models/estudiante.js";
 import { comentario_auditoria } from "../models/comentarioAuditoria.js";
+
 import { Sequelize } from 'sequelize';
 //mas adelante agregar validacion de que el usuario siempre tiene que estar activo.
 // Crear comentario

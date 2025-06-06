@@ -35,3 +35,6 @@ tsconfig.tsbuildinfo
 # Archivos generados por el sistema operativo
 Thumbs.db
 .DS_Store
+
+# llave Json para conectarse a bucket universilandia-vodcasts
+stone-lodge-454213-k0-148fcea09b08.json

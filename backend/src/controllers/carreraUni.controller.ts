@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { carreraUni } from '../models/carreraUni.js';
+import { getSignedUrl } from '../utils/storage.js';
+import { carreraUni, universidad, multimedia } from '../models/init-models.js';
 
-
-// Obtener todas las carreras universitarias con su universidad
+// Obtener todas las carreras universitarias
 export const listarCarrerasUniversitarias = async (req: Request, res: Response): Promise<void> => {
   try {
     const carreras = await carreraUni.findAll();
@@ -13,26 +13,52 @@ export const listarCarrerasUniversitarias = async (req: Request, res: Response):
   }
 };
 
-// Obtener una carrera universitaria por ID con su universidad
+// Obtener una carrera universitaria por ID
 export const CarreraUniversitariaPorId = async (req: Request, res: Response): Promise<void> => {
- return new Promise (async (resolve, reject) => {
-  try{
-    const {idCarrUni} = req.params;
-    if (!idCarrUni) {
-      res.status(400).json({ error: 'El idCarrera es obligatorio' });
-      return resolve();
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { idCarrUni } = req.params;
+      if (!idCarrUni) {
+        res.status(400).json({ error: 'El idCarrera es obligatorio' });
+        return resolve();
+      }
+
+      const Carrera = await carreraUni.findByPk(idCarrUni, {
+        include: [
+          {
+            model: universidad,
+            as: 'idUniversidad_universidad',
+            attributes: ['nombreUniversidad']
+          },
+          {
+            model: multimedia,
+            as: 'multimedia',
+            attributes: ['idMultimedia', 'url', 'descripcion']
+          }
+        ]
+      });
+
+      if (!Carrera) {
+        res.status(404).json({ error: 'Carrera no encontrada' });
+        return resolve();
+      }
+
+      // Usar directamente el nombre de archivo (sin prefijo)
+      let urlVideo = null;
+      if (Carrera.multimedia?.url) {
+        urlVideo = await getSignedUrl(Carrera.multimedia.url);
+      }
+
+      res.status(200).json({
+        ...Carrera.toJSON(),
+        urlVideo,
+      });
+
+      resolve();
+    } catch (error) {
+      console.error('Error al obtener carrera universitaria por ID:', error);
+      res.status(500).json({ error: 'Error interno al obtener carrera universitaria por ID' });
+      reject(error);
     }
-    const Carrera = await carreraUni.findByPk(idCarrUni);
-    if (Carrera){
-     res.status(200).json(Carrera);
-    } else{
-     res.status(404).json({ error: 'Carrera no encontrada' });
-    }
-    resolve();
-  }catch (error) {
-    console.error('Error al obtener carrera universitaria por ID:', error);
-    res.status(500).json({ error: 'Error interno al obtener carrera universitaria por ID' });
-    reject(error);
-  }
   });
 };

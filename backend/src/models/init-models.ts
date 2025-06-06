@@ -203,6 +203,9 @@ export function initModels(sequelize: Sequelize) {
   comentario.hasMany(comentario_auditoria, { as: "auditorias", foreignKey: "idComentario" });
   comentario_auditoria.belongsTo(usuario, { as: "idUsuario_usuario", foreignKey: "idUsuario" }); 
   usuario.hasMany(comentario_auditoria, { as: "comentariosAuditados", foreignKey: "idUsuario" });
+  carreraUni.belongsTo(multimedia, { as: "multimedia", foreignKey: "idMultimedia" });
+  multimedia.hasMany(carreraUni, { as: "carreras", foreignKey: "idMultimedia" });
+
 
   
 
