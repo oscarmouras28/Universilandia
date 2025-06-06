@@ -62,7 +62,7 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
           pending: 'https://universilandia.cl/pending',
         },
         auto_return: 'approved',
-        external_reference: idUsuario,
+        external_reference: idUsuario.toString(),
       },
     });
     const sandboxLink = preference.sandbox_init_point || preference.init_point;
@@ -82,37 +82,26 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
 // Este método recibe notificaciones de MercadoPago cuando se realizan pagos
 
 export const webhookNotificacion = async (req: Request, res: Response): Promise<void> => {
-  let body;
-  try {
-    const rawBody = req.body;
-    console.log('📥 Webhook RAW body:', rawBody.toString());
+  const body = req.body;
 
-    body = JSON.parse(rawBody.toString());
-  } catch (err) {
-    console.error('❌ Error al parsear el body:', err);
-    res.status(400).send('Invalid body format');
-    return;
-  }
-
-  console.log('🔥 Webhook body Parseado:', JSON.stringify(body, null, 2));
+  console.log('📥 Webhook RAW body:', JSON.stringify(body, null, 2));
 
   try {
     if (body.type !== 'payment') {
-      console.log('⚠ Evento ignorado (no es de tipo payment)');
+      console.log('⚠️ Evento ignorado (no es de tipo payment)');
       res.status(200).send('Evento ignorado (no es de tipo payment)');
       return;
     }
 
     const paymentId = body.data?.id;
 
-    if (!paymentId) {
-      console.log('❌ No se recibió paymentId en el body');
-      res.status(400).send('Falta paymentId');
+    if (!paymentId || paymentId === '123456') {
+      console.log('⚠️ Simulación detectada, omitiendo consulta a MercadoPago');
+      res.status(200).send('Simulación detectada');
       return;
     }
 
     const paymentClient = new Payment(mp);
-
     console.log(`🔍 Consultando detalles del pago en MercadoPago, paymentId: ${paymentId}`);
 
     const pago = await paymentClient.get({ id: paymentId });
@@ -126,26 +115,23 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
 
     if (!idUsuario) {
       console.log('❌ No se recibió external_reference (idUsuario) en el pago');
-      res.status(400).send('No se pudo procesar: falta idUsuario en external_reference');
+      res.status(400).send('Falta external_reference');
       return;
     }
 
-    // Evitar duplicados
-    const existente = await transaccion.findOne({
+    const yaExiste = await transaccion.findOne({
       where: { referenciaExterna: paymentId.toString() },
     });
 
-    if (existente) {
+    if (yaExiste) {
       console.log('⚠️ Transacción ya registrada por webhook');
-      res.status(200).send('Ya registrado');
+      res.status(200).send('Transacción duplicada (ya procesada)');
       return;
     }
 
     let nuevaSuscripcionId: string | undefined;
 
     if (estadoPago === 'approved') {
-      console.log('✅ Estado aprobado: creando suscripción');
-
       const hoy = new Date();
       const fechaFin = new Date();
       fechaFin.setDate(hoy.getDate() + 30);
@@ -158,15 +144,12 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       });
 
       nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
-
-      console.log(`✅ Suscripción creada con id: ${nuevaSuscripcionId}`);
+      console.log(`✅ Suscripción creada con ID: ${nuevaSuscripcionId}`);
     } else {
-      console.log(`⚠ Estado del pago no aprobado (${estadoPago}), no se crea suscripción`);
+      console.log(`⚠️ Pago con estado: ${estadoPago} — no se crea suscripción`);
     }
 
-    console.log('💾 Guardando transacción en base de datos');
-
-    const nuevaTransaccion = await transaccion.create({
+    await transaccion.create({
       idUsuario,
       idSuscripcion: nuevaSuscripcionId,
       monto: montoPago ?? 0,
@@ -176,8 +159,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       fecha: new Date(),
     });
 
-    console.log('✅ Transacción registrada correctamente:', nuevaTransaccion);
-
+    console.log('💾 Transacción registrada en base de datos');
     res.status(201).send('Webhook procesado correctamente');
   } catch (error: any) {
     console.error('❌ Error al procesar webhook:', error);

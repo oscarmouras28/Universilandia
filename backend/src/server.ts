@@ -9,7 +9,7 @@ import estudianteRoutes from './routes/estudianteRoutes.js'
 import dotenv from 'dotenv'
 import sequelize from './config/db.js'; // ✅ Importas la instancia de Sequelize
 import {initModels} from './models/init-models.js';
-import pagoRoutes from './routes/pagoRoutes.js';
+import pagoRoutes from './routes/pagoRoutes.js'; // importacion de las rutas de pago
 import transaccionRoutes from './routes/transaccionRoutes.js';
 import carreraInstitutoRoutes from './routes/carreraInstitutoRoutes.js';
 import carreraUniversidadRoutes from './routes/carreraUniversidadRoutes.js';
@@ -17,13 +17,17 @@ import adminRoutes from './routes/adminRoutes.js'; // Importa las rutas de admin
 import multimediaRoutes from './routes/multimediaRoutes.js';
 import { webhookNotificacion } from './controllers/pago.controller.js';
 
+
+
+
+
+
 dotenv.config()
 
 
 
 const app = express()
 app.use(cors())
-
 app.post('/api/pagos/webhook', express.raw({ type: 'application/json' }), webhookNotificacion);
 
 app.use(express.json())
