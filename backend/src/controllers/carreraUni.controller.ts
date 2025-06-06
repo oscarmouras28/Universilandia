@@ -13,7 +13,7 @@ export const listarCarrerasUniversitarias = async (req: Request, res: Response):
   }
 };
 
-// Obtener una carrera universitaria por ID con su universidad y URL firmada del video
+// Obtener una carrera universitaria por ID
 export const CarreraUniversitariaPorId = async (req: Request, res: Response): Promise<void> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -43,27 +43,15 @@ export const CarreraUniversitariaPorId = async (req: Request, res: Response): Pr
         return resolve();
       }
 
-      // Generar URL firmada evitando duplicación de ruta
+      // Usar directamente el nombre de archivo (sin prefijo)
       let urlVideo = null;
-      const fileName = Carrera.multimedia?.url;
-
-      if (fileName) {
-        // Normaliza la ruta del objeto para evitar errores como "vodcasts/vodcasts/..."
-        const cleanPath = fileName.startsWith('vodcasts/')
-          ? fileName
-          : `vodcasts/${fileName}`;
-
-        try {
-          urlVideo = await getSignedUrl(cleanPath);
-        } catch (err) {
-          console.warn('No se pudo generar URL firmada:', err);
-        }
+      if (Carrera.multimedia?.url) {
+        urlVideo = await getSignedUrl(Carrera.multimedia.url);
       }
 
-      // Devolver la carrera con URL firmada del video
       res.status(200).json({
         ...Carrera.toJSON(),
-        urlVideo
+        urlVideo,
       });
 
       resolve();
