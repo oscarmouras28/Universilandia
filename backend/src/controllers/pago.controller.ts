@@ -52,7 +52,7 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
             id: 'premium_001',
             title: 'Suscripción Premium',
             quantity: 1,
-            unit_price: 4990,
+            unit_price: 101,//precio de la suscripción en CLP
             currency_id: 'CLP',
           },
         ],
@@ -65,9 +65,9 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
         external_reference: idUsuario.toString(),
       },
     });
-    const sandboxLink = preference.sandbox_init_point || preference.init_point;
-    console.log('✅ Preferencia creada (init_point):', sandboxLink);
-    res.status(200).json({ init_point: sandboxLink });
+    console.log('✅ Preferencia creada (init_point):', preference.init_point);
+    res.status(200).json({ init_point: preference.init_point });
+
 
     // console.log('✅ Preferencia creada:', preference);
     // res.status(200).json({ init_point: preference.init_point });
@@ -82,22 +82,34 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
 // Este método recibe notificaciones de MercadoPago cuando se realizan pagos
 
 export const webhookNotificacion = async (req: Request, res: Response): Promise<void> => {
-  const body = req.body;
-
-  console.log('📥 Webhook RAW body:', JSON.stringify(body, null, 2));
+  let paymentId: string | undefined;
+  let tipoEvento: string | undefined;
 
   try {
-    if (body.type !== 'payment') {
+    // Soporte tanto para body como para query string
+    if (req.method === 'POST' && req.headers['content-type'] === 'application/json') {
+      const rawBody = req.body;
+      const body = Buffer.isBuffer(rawBody) ? JSON.parse(rawBody.toString()) : rawBody;
+
+      console.log('📥 Webhook RAW body:', JSON.stringify(body, null, 2));
+      tipoEvento = body.type;
+      paymentId = body.data?.id;
+    } else {
+      // fallback para GET o POST con query
+      tipoEvento = req.query.type as string;
+      paymentId = req.query['data.id'] as string;
+      console.log(`📥 Webhook vía query: type=${tipoEvento}, id=${paymentId}`);
+    }
+
+    if (tipoEvento !== 'payment') {
       console.log('⚠️ Evento ignorado (no es de tipo payment)');
-      res.status(200).send('Evento ignorado (no es de tipo payment)');
+      res.status(200).send('Evento ignorado');
       return;
     }
 
-    const paymentId = body.data?.id;
-
     if (!paymentId || paymentId === '123456') {
-      console.log('⚠️ Simulación detectada, omitiendo consulta a MercadoPago');
-      res.status(200).send('Simulación detectada');
+      console.log('⚠️ ID inválido o simulado');
+      res.status(200).send('ID inválido');
       return;
     }
 
@@ -105,7 +117,6 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     console.log(`🔍 Consultando detalles del pago en MercadoPago, paymentId: ${paymentId}`);
 
     const pago = await paymentClient.get({ id: paymentId });
-
     console.log('✅ Datos del pago obtenidos:', JSON.stringify(pago, null, 2));
 
     const estadoPago = pago.status;
@@ -114,7 +125,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     const idUsuario = pago.external_reference;
 
     if (!idUsuario) {
-      console.log('❌ No se recibió external_reference (idUsuario) en el pago');
+      console.log('❌ No se recibió external_reference');
       res.status(400).send('Falta external_reference');
       return;
     }
@@ -124,12 +135,12 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     });
 
     if (yaExiste) {
-      console.log('⚠️ Transacción ya registrada por webhook');
-      res.status(200).send('Transacción duplicada (ya procesada)');
+      console.log('⚠️ Transacción duplicada');
+      res.status(200).send('Ya procesada');
       return;
     }
 
-    let nuevaSuscripcionId: string | undefined;
+    let nuevaSuscripcionId: string | undefined = undefined;
 
     if (estadoPago === 'approved') {
       const hoy = new Date();
@@ -146,7 +157,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
       console.log(`✅ Suscripción creada con ID: ${nuevaSuscripcionId}`);
     } else {
-      console.log(`⚠️ Pago con estado: ${estadoPago} — no se crea suscripción`);
+      console.log(`⚠️ Pago con estado: ${estadoPago}, no se crea suscripción`);
     }
 
     await transaccion.create({
@@ -159,10 +170,10 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       fecha: new Date(),
     });
 
-    console.log('💾 Transacción registrada en base de datos');
-    res.status(201).send('Webhook procesado correctamente');
+    console.log('💾 Transacción registrada');
+    res.status(201).send('Procesado con éxito');
   } catch (error: any) {
     console.error('❌ Error al procesar webhook:', error);
-    res.status(500).send('Error interno al procesar webhook');
+    res.status(500).send('Error interno');
   }
 };
