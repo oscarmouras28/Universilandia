@@ -1,5 +1,5 @@
 import express from 'express';
-import { crearPreferencia, webhookNotificacion } from '../controllers/pago.controller.js';
+import { crearPreferencia} from '../controllers/pago.controller.js';
 import { verificarToken } from '../middleware/authMiddleware.js';
 
 

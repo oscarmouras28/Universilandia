@@ -62,11 +62,11 @@ export const confirmarTransaccion = async (req: Request, res: Response) => {
     const nuevaTransaccion = await transaccion.create({
       idUsuario,
       idSuscripcion: nuevaSuscripcionId ?? undefined,
-      monto: montoPago ?? 0,
-      metodoPago: metodoPago?? '',
+      monto: Number(montoPago) || 0,
+      metodoPago: metodoPago ?? '',
       estado: estadoPago ?? '',
       referenciaExterna: paymentId.toString(),
-      fecha: new Date(),
+      fechaPago: new Date(), // ✅ este sí es un objeto Date válido
     });
 
     res.status(201).json({

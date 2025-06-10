@@ -7,12 +7,12 @@ import type { suscripcion, suscripcionId } from './suscripcion';
 export interface transaccionAttributes {
   idTransaccion: string;
   idUsuario: string;
-  idSuscripcion?: string;
   monto: number;
-  metodoPago: string;
+  fechaPago: Date;
+  idSuscripcion?: string;
   estado: string;
+  metodoPago: string;
   referenciaExterna?: string;
-  fecha: Date;
 }
 
 export type transaccionPk = "idTransaccion";
@@ -23,12 +23,12 @@ export type transaccionCreationAttributes = Optional<transaccionAttributes, tran
 export class transaccion extends Model<transaccionAttributes, transaccionCreationAttributes> implements transaccionAttributes {
   idTransaccion!: string;
   idUsuario!: string;
-  idSuscripcion?: string;
   monto!: number;
-  metodoPago!: string;
+  fechaPago!: Date;
   estado!: string;
+  metodoPago!: string;
   referenciaExterna?: string;
-  fecha!: Date;
+  idSuscripcion?: string;
 
   // Relaciones
   idUsuario_usuario!: usuario;
@@ -73,7 +73,7 @@ export class transaccion extends Model<transaccionAttributes, transaccionCreatio
         type: DataTypes.STRING(255),
         allowNull: true
       },
-      fecha: {
+      fechaPago: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn('GETDATE')

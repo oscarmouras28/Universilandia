@@ -51,11 +51,17 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
           {
             id: 'premium_001',
             title: 'Suscripción Premium',
+            description: 'Acceso a contenido exclusivo de Universilandia por 30 días',
             quantity: 1,
-            unit_price: 101,//precio de la suscripción en CLP
+            unit_price: 200,//precio de la suscripción en CLP
             currency_id: 'CLP',
+            category_id: 'services',
           },
         ],
+        payer: {
+          name: 'Oscar',
+          surname: 'Mouras',
+        },
         back_urls: {
           success: 'https://universilandia.cl/success',
           failure: 'https://universilandia.cl/failure',
@@ -63,6 +69,7 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
         },
         auto_return: 'approved',
         external_reference: idUsuario.toString(),
+        notification_url: 'https://universilandia-backend-592919962120.southamerica-west1.run.app/api/pagos/webhook',
       },
     });
     console.log('✅ Preferencia creada (init_point):', preference.init_point);
@@ -90,6 +97,8 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     if (req.method === 'POST' && req.headers['content-type'] === 'application/json') {
       const rawBody = req.body;
       const body = Buffer.isBuffer(rawBody) ? JSON.parse(rawBody.toString()) : rawBody;
+      console.log('rawBody:', rawBody)
+      console.log('body:', body)
 
       console.log('📥 Webhook RAW body:', JSON.stringify(body, null, 2));
       tipoEvento = body.type;
@@ -159,7 +168,8 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     } else {
       console.log(`⚠️ Pago con estado: ${estadoPago}, no se crea suscripción`);
     }
-
+    console.log('📌 Detalle de rechazo:', pago.status_detail);
+    console.log(idUsuario, nuevaSuscripcionId, montoPago, metodoPago, estadoPago, paymentId);
     await transaccion.create({
       idUsuario,
       idSuscripcion: nuevaSuscripcionId,
@@ -167,7 +177,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       metodoPago: metodoPago ?? '',
       estado: estadoPago ?? '',
       referenciaExterna: paymentId.toString(),
-      fecha: new Date(),
+      fechaPago: new Date(),
     });
 
     console.log('💾 Transacción registrada');
