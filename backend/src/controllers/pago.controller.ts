@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import mp from '../config/mercadoPago.js';
 import { Preference } from 'mercadopago/dist/clients/preference/index.js';
 import { suscripcion } from '../models/suscripcion.js';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { Payment } from 'mercadopago/dist/clients/payment/index.js';
 import { transaccion } from '../models/transaccion.js';
 
@@ -93,18 +93,13 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
   let tipoEvento: string | undefined;
 
   try {
-    // Soporte tanto para body como para query string
     if (req.method === 'POST' && req.headers['content-type'] === 'application/json') {
       const rawBody = req.body;
       const body = Buffer.isBuffer(rawBody) ? JSON.parse(rawBody.toString()) : rawBody;
-      console.log('rawBody:', rawBody)
-      console.log('body:', body)
-
       console.log('📥 Webhook RAW body:', JSON.stringify(body, null, 2));
       tipoEvento = body.type;
       paymentId = body.data?.id;
     } else {
-      // fallback para GET o POST con query
       tipoEvento = req.query.type as string;
       paymentId = req.query['data.id'] as string;
       console.log(`📥 Webhook vía query: type=${tipoEvento}, id=${paymentId}`);
@@ -129,6 +124,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     console.log('✅ Datos del pago obtenidos:', JSON.stringify(pago, null, 2));
 
     const estadoPago = pago.status;
+    const detalleRechazo = pago.status_detail;
     const montoPago = pago.transaction_amount;
     const metodoPago = pago.payment_method_id;
     const idUsuario = pago.external_reference;
@@ -136,6 +132,13 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
     if (!idUsuario) {
       console.log('❌ No se recibió external_reference');
       res.status(400).send('Falta external_reference');
+      return;
+    }
+
+    // ❌ Filtra pagos no definitivos
+    if (estadoPago !== 'approved' && estadoPago !== 'rejected') {
+      console.log(`⏳ Estado "${estadoPago}" no es definitivo. No se registra aún.`);
+      res.status(200).send('Estado no final');
       return;
     }
 
@@ -166,24 +169,26 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
       nuevaSuscripcionId = nuevaSuscripcion.idSuscripcion;
       console.log(`✅ Suscripción creada con ID: ${nuevaSuscripcionId}`);
     } else {
-      console.log(`⚠️ Pago con estado: ${estadoPago}, no se crea suscripción`);
+      console.log(`⚠️ Pago rechazado — estado: ${estadoPago}`);
+      console.log('📌 Detalle de rechazo:', detalleRechazo);
     }
-    console.log('📌 Detalle de rechazo:', pago.status_detail);
-    console.log(idUsuario, nuevaSuscripcionId, montoPago, metodoPago, estadoPago, paymentId);
+
     await transaccion.create({
       idUsuario,
-      idSuscripcion: nuevaSuscripcionId,
+      idSuscripcion: nuevaSuscripcionId ?? '00000000-0000-0000-0000-000000000000',
       monto: montoPago ?? 0,
       metodoPago: metodoPago ?? '',
-      estado: estadoPago ?? '',
+      estado: estadoPago,
       referenciaExterna: paymentId.toString(),
-      fechaPago: new Date(),
+      fechaPago: Sequelize.literal("GETDATE()") as unknown as Date,
     });
 
-    console.log('💾 Transacción registrada');
+    console.log('💾 Transacción registrada correctamente');
     res.status(201).send('Procesado con éxito');
+
   } catch (error: any) {
     console.error('❌ Error al procesar webhook:', error);
     res.status(500).send('Error interno');
   }
 };
+

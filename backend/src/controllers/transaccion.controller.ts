@@ -3,7 +3,7 @@ import mp from '../config/mercadoPago.js';
 import { transaccion } from '../models/transaccion.js';
 import { suscripcion } from '../models/suscripcion.js';
 import { Payment } from 'mercadopago/dist/clients/payment/index.js';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 
 export const confirmarTransaccion = async (req: Request, res: Response) => {
   const paymentId = req.body.payment_id;
@@ -66,7 +66,7 @@ export const confirmarTransaccion = async (req: Request, res: Response) => {
       metodoPago: metodoPago ?? '',
       estado: estadoPago ?? '',
       referenciaExterna: paymentId.toString(),
-      fechaPago: new Date(), // ✅ este sí es un objeto Date válido
+      fechaPago: Sequelize.literal("GETDATE()") as unknown as Date,
     });
 
     res.status(201).json({
