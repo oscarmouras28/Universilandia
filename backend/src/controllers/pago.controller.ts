@@ -53,14 +53,23 @@ export const crearPreferencia = async (req: Request, res: Response): Promise<voi
             title: 'Suscripción Premium',
             description: 'Acceso a contenido exclusivo de Universilandia por 30 días',
             quantity: 1,
-            unit_price: 200,//precio de la suscripción en CLP
+            unit_price: 1000,//precio de la suscripción en CLP
             currency_id: 'CLP',
             category_id: 'services',
           },
         ],
         payer: {
-          name: 'Oscar',
-          surname: 'Mouras',
+          name: 'jeremy',
+          surname: 'correa',
+          email: 'jeremycorrea8@gmail.com', // ⚠️ este es MUY importante
+          identification: {
+            type: 'RUT',
+            number: '19706252-5',
+          },
+          address: {
+            street_name: 'Av. Siempre Viva',
+            zip_code: '2800000',
+          },
         },
         back_urls: {
           success: 'https://universilandia.cl/success',
@@ -175,7 +184,7 @@ export const webhookNotificacion = async (req: Request, res: Response): Promise<
 
     await transaccion.create({
       idUsuario,
-      idSuscripcion: nuevaSuscripcionId ?? '00000000-0000-0000-0000-000000000000',
+      idSuscripcion: nuevaSuscripcionId ?? undefined,
       monto: montoPago ?? 0,
       metodoPago: metodoPago ?? '',
       estado: estadoPago,
