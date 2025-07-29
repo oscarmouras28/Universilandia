@@ -10,7 +10,7 @@ export default function CareerDetailPage() {
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
   if (!carrera)
     return <p className="text-center mt-10">Carrera no encontrada.</p>;
-
+console.log("datos de la carrera:",carrera)
   const videoUrl = carrera?.urlVideo; // temporal
 
   return (
