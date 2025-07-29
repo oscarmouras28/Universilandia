@@ -1,29 +1,38 @@
 import { Storage } from '@google-cloud/storage';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import fs from 'fs';
 
-// Reemplazo de __dirname en módulos ES
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Ruta donde se monta el secreto
+const keyFilePath = '/secrets/google/vodcast-access-service';
+
+// Verificación en logs
+console.log('[storage.ts] Verificando si el archivo de credenciales existe en:', keyFilePath);
+console.log('[storage.ts] Existe el archivo?:', fs.existsSync(keyFilePath));
 
 const storage = new Storage({
-  keyFilename: path.join(__dirname, '../config/universilandia-1706476965614-15e97ffd92fd.json'),
+  keyFilename: keyFilePath,
 });
 
 const bucketName = 'universilandia-vodcasts';
 
 export async function getSignedUrl(filePath: string): Promise<string> {
+  console.log('[getSignedUrl] Generando URL firmada para el archivo:', filePath);
+
   const options = {
     version: 'v4' as const,
     action: 'read' as const,
     expires: Date.now() + 15 * 60 * 1000, // 15 minutos
   };
 
-  const [url] = await storage
-    .bucket(bucketName)
-    .file(filePath)
-    .getSignedUrl(options);
+  try {
+    const [url] = await storage
+      .bucket(bucketName)
+      .file(filePath)
+      .getSignedUrl(options);
 
-  return url;
+    console.log('[getSignedUrl] URL firmada generada:', url);
+    return url;
+  } catch (error) {
+    console.error('[getSignedUrl] Error al generar URL firmada:', error);
+    throw error;
+  }
 }
