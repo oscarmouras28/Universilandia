@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = "https://universilandia-backend-592919962120.southamerica-west1.run.app/api/users";
+const API_URL = "https://universilandia-backend-24802697360.southamerica-west1.run.app/api/users";
 
 export async function loginUser(correo: string, password: string) {
     try {
