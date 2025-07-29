@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = ":https://universilandia-backend-24802697360.southamerica-west1.run.app/api/carrerasUniversitarias";
+const API_URL = "https://universilandia-backend-24802697360.southamerica-west1.run.app/api/carrerasUniversitarias";
 
 export async function getCarrerasUniversitarias() {
     try {
