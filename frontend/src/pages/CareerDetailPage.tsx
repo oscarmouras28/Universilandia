@@ -11,7 +11,9 @@ export default function CareerDetailPage() {
   if (!carrera)
     return <p className="text-center mt-10">Carrera no encontrada.</p>;
 console.log("datos de la carrera:",carrera)
-  const videoUrl = carrera?.urlVideo; // temporal
+
+const videoUrl = carrera?.urlVideo; // temporal
+console.log("video:",videoUrl)
 
   return (
     <PublicLayout>
