@@ -15,7 +15,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const user = await usuario.findOne({ where: { correo } });
 
     if (!user) {
-      res.status(401).json({ error: 'No se puede encontrar el Usuario' });
+      res.status(401).json({ error: 'No se puede encontrar el Usuario Prueba' });
       return;
     }
 
