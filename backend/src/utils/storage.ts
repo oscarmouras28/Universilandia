@@ -12,7 +12,7 @@ const storage = new Storage({
   keyFilename: keyFilePath,
 });
 
-const bucketName = 'universilandia-vodcasts';
+const bucketName = 'universilandia-vodcast';
 
 export async function getSignedUrl(filePath: string): Promise<string> {
   console.log('[getSignedUrl] Generando URL firmada para el archivo:', filePath);

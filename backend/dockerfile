@@ -7,6 +7,9 @@ RUN npm install
 
 COPY . .
 
+# 🔧 Arreglamos permisos del binario de tsc
+RUN chmod +x node_modules/.bin/tsc
+
 # Compila TypeScript (si aplica)
 RUN npm run build
 
