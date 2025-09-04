@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Logo from "../../assets/Logo.png";
 import NavLink from "./NavLink";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
 
 export default function Navbar() {
@@ -23,9 +23,9 @@ export default function Navbar() {
 
   return (
     <header className="bg-[#EEE6E0] py-4 px-6 flex justify-between items-center relative">
-      <a href="/" className="flex-shrink-0">
+      <Link to="/" className="flex-shrink-0">
         <img src={Logo} alt="Logo Universilandia" className="w-28 h-20" />
-      </a>
+      </Link>
 
       {/* Hamburguesa para móvil */}
       <button
@@ -44,8 +44,20 @@ export default function Navbar() {
         <NavLink to="/" onClick={() => setOpenMenu(false)}>
           Inicio
         </NavLink>
+        <NavLink to="/nosotros" onClick={() => setOpenMenu(false)}>
+          Nosotros
+        </NavLink>
+        <NavLink to="/comunidad" onClick={() => setOpenMenu(false)}>
+          Comunidad
+        </NavLink>
+        <NavLink to="/contacto" onClick={() => setOpenMenu(false)}>
+          Contacto
+        </NavLink>
         <NavLink to="/reseña" onClick={() => setOpenMenu(false)}>
           Reseñas de carreras
+        </NavLink>
+        <NavLink to="/blog" onClick={() => setOpenMenu(false)}>
+          Blog
         </NavLink>
 
         {isAuthenticated ? (

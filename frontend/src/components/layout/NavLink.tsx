@@ -1,5 +1,6 @@
+// src/components/common/NavLink.tsx
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink as RRNavLink } from "react-router-dom";
 
 interface NavLinkProps {
   to: string;
@@ -12,19 +13,25 @@ export default function NavLink({
   to,
   children,
   variant = "default",
+  onClick,
 }: NavLinkProps) {
-  const location = useLocation();
-  const isActive = location.pathname === to;
-
-  const variants = {
-    default: `text-base font-semibold text-xl hover:text-blue-600 ${isActive ? "underline underline-offset-4" : ""}`,
-    button:
-      "bg-[#E0E6EE] text-xl font-medium text-black px-4 py-2 rounded-2xl shadow",
-  };
+  const base =
+    variant === "button"
+      ? "bg-[#E0E6EE] text-xl font-medium text-black px-4 py-2 rounded-2xl shadow"
+      : "text-xl font-semibold hover:text-blue-600";
 
   return (
-    <Link to={to} className={`${variants[variant]}`}>
+    <RRNavLink
+      to={to}
+      onClick={onClick}
+      className={({ isActive }) =>
+        `${base} ${
+          isActive && variant !== "button" ? "underline underline-offset-4" : ""
+        }`
+      }
+      end={to === "/"} // exacto solo en "/"
+    >
       {children}
-    </Link>
+    </RRNavLink>
   );
 }
