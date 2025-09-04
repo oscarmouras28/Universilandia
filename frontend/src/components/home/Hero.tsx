@@ -25,7 +25,7 @@ export default function Hero() {
           <div className="flex flex-col items-center">
             <a
               href="/login"
-              className="bg-[#EEE6E0] text-black px-6 py-3 rounded-lg font-semibold shadow"
+              className="bg-[#022D50] text-white px-6 py-3 rounded-lg shadow"
             >
               Inicia Sesión
             </a>
